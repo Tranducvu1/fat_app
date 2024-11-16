@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "988979923331",
+    "project_id": "study-86d58",
+    "storage_bucket": "study-86d58.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988979923331:android:a7acc722479ff26cf0ceb6",
+        "android_client_info": {
+          "package_name": "com.example.fat_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "988979923331-0t4140s1vltpt8c1tu7129ll79s9ipgb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCc3xQaZVaOu_GOjR-Azr3g5x2C-x1y9hQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988979923331-0t4140s1vltpt8c1tu7129ll79s9ipgb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "988979923331-2oqaqscbfbdl3ci67oj0cvk8i85toh60.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.fatadmin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988979923331:android:eff4f48bedf7df87f0ceb6",
+        "android_client_info": {
+          "package_name": "com.study.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "988979923331-imgpp2kuufe9hir70hgfdct3ib3vqa9o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.study.app",
+            "certificate_hash": "1b37ef755bc1688c72eb5ad3e29bffa01313b781"
+          }
+        },
+        {
+          "client_id": "988979923331-oi0mpoolhk4354ceplpht3qna669ic3s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.study.app",
+            "certificate_hash": "86691e006ba7b68588a73c953defbba1796e6b6e"
+          }
+        },
+        {
+          "client_id": "988979923331-0t4140s1vltpt8c1tu7129ll79s9ipgb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCc3xQaZVaOu_GOjR-Azr3g5x2C-x1y9hQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988979923331-0t4140s1vltpt8c1tu7129ll79s9ipgb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "988979923331-2oqaqscbfbdl3ci67oj0cvk8i85toh60.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.fatadmin"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
