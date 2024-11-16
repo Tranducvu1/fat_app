@@ -58,7 +58,7 @@ We are continuously working to improve Fat_App. Upcoming features include:
 We welcome contributions to Fat_App! Feel free to fork the project, submit a pull request, or open an issue to suggest improvements.
 
 ## 📜 **License**
-Fat_App is developed and maintained by [Your Team/Your Name]. All rights reserved.
+Fat_App is developed and maintained by [Trần Đức Vũ leader]. All rights reserved.
 
 ---
 
