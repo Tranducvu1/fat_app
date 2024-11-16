@@ -1,6 +1,7 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:fat_app/service/user_service.dart';
-import 'package:fat_app/view/updateInformationPage.dart';
+import 'package:fat_app/view/update_Information_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:firebase_auth/firebase_auth.dart';

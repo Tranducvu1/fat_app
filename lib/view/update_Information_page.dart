@@ -5,7 +5,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fat_app/Model/UserModel.dart' as AppUser;
 import 'package:fat_app/Model/districts_and_wards.dart';
-import 'package:fat_app/constants/routes.dart';
+import 'package:fat_app/constants/constant_routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,10 +18,12 @@ class UpdateInformationPage extends StatefulWidget {
 
 class _UpdateInformationPageState extends State<UpdateInformationPage> {
   final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _roleController = TextEditingController();
   final TextEditingController _classNameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   String? _selectedDistrict;
+  String role = '';
   String? _selectedWard;
   String username = '';
   String? _currentProfileImageUrl;
@@ -55,15 +58,18 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
             .get();
 
         if (doc.exists) {
-          setState(() {
+          setState(() async {
             username = doc.get('username') as String? ?? '';
+            role = doc.get('rool') as String? ?? ''; // Get role from Firestore
+            _roleController.text = role; // Set role in controller
             _currentProfileImageUrl = doc.get('profileImage') as String?;
             _userNameController.text = doc.get('username') as String? ?? '';
-            _classNameController.text = doc.get('userClass') as String? ?? '';
+            _classNameController.text = doc.get('class') as String? ?? '';
             _phoneNumberController.text =
                 doc.get('phoneNumber') as String? ?? '';
             // Parse position if it exists
             String position = doc.get('position') as String? ?? '';
+
             if (position.isNotEmpty) {
               List<String> parts = position.split(', ');
               if (parts.length >= 4) {
@@ -155,7 +161,7 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
             '$_selectedWard, $_selectedDistrict, Đà Nẵng, ${_addressController.text}',
         profileImage: (imageUrl ?? _currentProfileImageUrl) ?? '',
         email: user?.email ?? '',
-        role: 'user',
+        role: role,
         phoneNumber: _phoneNumberController.text,
         createdCourses: [],
       );
@@ -189,299 +195,387 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        leading: Stack(
-          children: [
-            CircleAvatar(
-              backgroundImage: _imageFile != null
-                  ? FileImage(_imageFile!) as ImageProvider
-                  : _currentProfileImageUrl != null
-                      ? NetworkImage(_currentProfileImageUrl!)
-                      : AssetImage('images/students.png') as ImageProvider,
-              child: _isUploading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : null,
-            ),
-            if (_isUploading)
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.black.withOpacity(0.5),
-                  ),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-          ],
+        elevation: 0,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black87),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          username.isNotEmpty ? username : 'User',
-          style: const TextStyle(color: Colors.black),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.notifications_none),
-            onPressed: () {},
+          username.isNotEmpty ? username : 'Profile',
+          style: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
           ),
-        ],
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Text(
-                'Update information',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 20),
-              _buildProfileImageSection(),
-              SizedBox(height: 20),
-              _buildTextField(
-                controller: _userNameController,
-                hintText: 'Enter username',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your username';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              _buildTextField(
-                controller: _classNameController,
-                hintText: 'Class',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your class';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              _buildTextField(
-                controller: _phoneNumberController,
-                hintText: 'Phone number',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your phone number';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              _buildDistrictDropdown(),
-              SizedBox(height: 16),
-              _buildWardDropdown(),
-              SizedBox(height: 16),
-              _buildTextField(
-                controller: _addressController,
-                hintText: 'Enter your street and house number',
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your address';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _isUploading ? null : _handleSubmit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: _isUploading
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text(
-                        'Submit',
-                        style: TextStyle(fontSize: 18),
-                      ),
-              ),
-            ],
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildHeader(),
+                SizedBox(height: 32),
+                _buildProfileImage(),
+                SizedBox(height: 40),
+                _buildInputFields(),
+                SizedBox(height: 40),
+                _buildSubmitButton(),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileImageSection() {
+  Widget _buildHeader() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.blue, width: 2),
-          ),
-          child: Stack(
-            children: [
-              ClipOval(
-                child: _imageFile != null
-                    ? Image.file(
-                        _imageFile!,
-                        width: 120,
-                        height: 120,
-                        fit: BoxFit.cover,
-                      )
-                    : _currentProfileImageUrl != null
-                        ? Image.network(
-                            _currentProfileImageUrl!,
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              );
-                            },
-                          )
-                        : Image.asset(
-                            'images/students.png',
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                          ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: Icon(Icons.camera_alt, color: Colors.white, size: 20),
-                    onPressed: _pickImage,
-                  ),
-                ),
-              ),
-              if (_isUploading)
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black.withOpacity(0.5),
-                    ),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+        Text(
+          'Update Profile',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
         ),
-        if (_imageFile != null)
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _imageFile = null;
-              });
-            },
-            child: Text('Remove selected image'),
+        SizedBox(height: 8),
+        Text(
+          'Complete your profile information',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[600],
           ),
+        ),
       ],
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: Colors.lightBlueAccent.withOpacity(0.5),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
-        ),
+  Widget _buildProfileImage() {
+    return Center(
+      child: Stack(
+        children: [
+          Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.blue.shade300, Colors.blue.shade600],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.withOpacity(0.2),
+                  spreadRadius: 4,
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(3),
+              child: ClipOval(
+                child: _buildProfileImageContent(),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 3,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.camera_alt,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDistrictDropdown() {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.lightBlueAccent.withOpacity(0.5),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
+  Widget _buildProfileImageContent() {
+    if (_isUploading) {
+      return Container(
+        color: Colors.black.withOpacity(0.5),
+        child: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
         ),
-      ),
-      hint: Text('Select District'),
-      value: _selectedDistrict,
-      isExpanded: true,
-      items: _districtsAndWards.keys.map((String district) {
-        return DropdownMenuItem<String>(
-          value: district,
-          child: Text(district),
-        );
-      }).toList(),
-      onChanged: (newValue) {
-        setState(() {
-          _selectedDistrict = newValue;
-          _selectedWard = null;
-        });
-      },
-    );
-  }
-
-  Widget _buildWardDropdown() {
-    if (_selectedDistrict == null) {
-      return Container();
+      );
     }
 
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.lightBlueAccent.withOpacity(0.5),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide.none,
+    if (_imageFile != null) {
+      return Image.file(
+        _imageFile!,
+        fit: BoxFit.cover,
+        width: 140,
+        height: 140,
+      );
+    }
+
+    if (_currentProfileImageUrl != null) {
+      return Image.network(
+        _currentProfileImageUrl!,
+        fit: BoxFit.cover,
+        width: 140,
+        height: 140,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          );
+        },
+      );
+    }
+
+    return Image.asset(
+      'images/students.png',
+      fit: BoxFit.cover,
+      width: 140,
+      height: 140,
+    );
+  }
+
+  Widget _buildInputFields() {
+    return Column(
+      children: [
+        _buildInputField(
+          controller: _userNameController,
+          label: 'Full Name',
+          icon: Icons.person_outline,
+          hint: 'Enter your full name',
         ),
+        SizedBox(height: 20),
+        _buildInputField(
+          // Added role input field
+          controller: _roleController,
+          label: 'Role',
+          icon: Icons.work_outline, // Changed icon to be more role-appropriate
+          hint: 'Your role',
+        ),
+        SizedBox(height: 20),
+        _buildInputField(
+          controller: _classNameController,
+          label: 'Class',
+          icon: Icons.school_outlined,
+          hint: 'Enter your class',
+        ),
+        SizedBox(height: 20),
+        _buildInputField(
+          controller: _phoneNumberController,
+          label: 'Phone Number',
+          icon: Icons.phone_outlined,
+          hint: 'Enter your phone number',
+          keyboardType: TextInputType.phone,
+        ),
+        SizedBox(height: 20),
+        _buildDropdownField(
+          value: _selectedDistrict,
+          items: _districtsAndWards.keys.toList(),
+          label: 'District',
+          icon: Icons.location_city_outlined,
+          onChanged: (value) {
+            setState(() {
+              _selectedDistrict = value;
+              _selectedWard = null;
+            });
+          },
+        ),
+        SizedBox(height: 20),
+        if (_selectedDistrict != null)
+          _buildDropdownField(
+            value: _selectedWard,
+            items: _districtsAndWards[_selectedDistrict]!,
+            label: 'Ward',
+            icon: Icons.map_outlined,
+            onChanged: (value) {
+              setState(() {
+                _selectedWard = value;
+              });
+            },
+          ),
+        SizedBox(height: 20),
+        _buildInputField(
+          controller: _addressController,
+          label: 'Street Address',
+          icon: Icons.home_outlined,
+          hint: 'Enter street and house number',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required String hint,
+    TextInputType? keyboardType,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              prefixIcon: Icon(icon, color: Colors.blue),
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey[400]),
+              border: InputBorder.none,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'This field is required';
+              }
+              return null;
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String? value,
+    required List<String> items,
+    required String label,
+    required IconData icon,
+    required Function(String?) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: DropdownButtonFormField<String>(
+            value: value,
+            items: items.map((String item) {
+              return DropdownMenuItem<String>(
+                value: item,
+                child: Text(item),
+              );
+            }).toList(),
+            onChanged: onChanged,
+            decoration: InputDecoration(
+              prefixIcon: Icon(icon, color: Colors.blue),
+              border: InputBorder.none,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
+            isExpanded: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please select an option';
+              }
+              return null;
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade400, Colors.blue.shade700],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
-      hint: Text('Select Ward'),
-      value: _selectedWard,
-      isExpanded: true,
-      items: _districtsAndWards[_selectedDistrict]!.map((String ward) {
-        return DropdownMenuItem<String>(
-          value: ward,
-          child: Text(ward),
-        );
-      }).toList(),
-      onChanged: (newValue) {
-        setState(() {
-          _selectedWard = newValue;
-        });
-      },
+      child: ElevatedButton(
+        onPressed: _isUploading ? null : _handleSubmit,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: _isUploading
+            ? CircularProgressIndicator(color: Colors.white)
+            : Text(
+                'Update Profile',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+      ),
     );
   }
 }

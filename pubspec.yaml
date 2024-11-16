@@ -45,6 +45,8 @@ dependencies:
   youtube_player_iframe: ^4.0.4
   flutter_admin_scaffold: ^1.3.0
   zego_zim: ^2.17.1+1
+  animated_text_kit: ^4.2.2
+  flutter_staggered_animations: ^1.1.1
 
 dev_dependencies:
   flutter_test:

@@ -17,16 +17,29 @@ class CoursePage extends StatefulWidget {
   _CoursePage createState() => _CoursePage();
 }
 
-class _CoursePage extends State<CoursePage> {
+class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
   String username = '';
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Course> courses = [];
   List<String> registeredCourses = [];
 
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
     _fetchCourses();
     _fetchRegisteredCourses();
     _loadUserData();
@@ -197,7 +210,7 @@ class _CoursePage extends State<CoursePage> {
     String description,
     bool isRegistered,
     String creatorId,
-    Course course, // Passing the full course object
+    Course course,
   ) {
     return Card(
       elevation: 4,

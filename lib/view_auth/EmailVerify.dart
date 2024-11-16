@@ -1,5 +1,5 @@
 import 'package:fat_app/auth/auth_service.dart';
-import 'package:fat_app/constants/routes.dart';
+import 'package:fat_app/constants/constant_routes.dart';
 import 'package:flutter/material.dart';
 
 class EmailVerify extends StatefulWidget {

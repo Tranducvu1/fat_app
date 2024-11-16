@@ -1,4 +1,4 @@
-import 'package:fat_app/constants/routes.dart';
+import 'package:fat_app/constants/constant_routes.dart';
 import 'package:flutter/material.dart';
 
 class LoadingTeacherView extends StatefulWidget {

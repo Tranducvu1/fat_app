@@ -159,14 +159,6 @@ class _LoginPageState extends State<LoginPage> {
                               setState(() {
                                 visible = true;
                               });
-                              // userService.signIn(_formkey, context,
-                              //     emailController.text, passwordController.text);
-                              // Navigator.of(context).push(
-                              //   MaterialPageRoute(
-                              //     builder: (context) =>
-                              //         LoadingView(duration: 3000),
-                              //   ),
-                              // );
 
                               // Assuming you already have the service and the method to sign in
                               userService

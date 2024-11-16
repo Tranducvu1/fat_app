@@ -1,28 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fat_app/Model/courses.dart';
-import 'package:fat_app/view/Student/chat_rooms_page.dart';
-import 'package:fat_app/view/Student/list_lecture_page.dart';
-import 'package:fat_app/view/Student/tutor_list_page.dart';
-import 'package:fat_app/view/Teacher/tutor_chat_rooms_page%20.dart';
-import 'package:fat_app/view/Teacher/class_schedule_page.dart';
-import 'package:fat_app/view/Teacher/Interact_learning_teacher_page.dart';
-import 'package:fat_app/view/Teacher/course_teacher_page.dart';
+import 'package:fat_app/auth/auth_state_handler.dart';
+import 'package:fat_app/constants/routes.dart';
 import 'package:fat_app/view/introduction_screen.dart';
-import 'package:fat_app/view/payment/confirm_method_screen.dart';
-import 'package:fat_app/view_auth/EmailVerify.dart';
 import 'package:fat_app/view_auth/login_view.dart';
-import 'package:fat_app/view_auth/register_view.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fat_app/view/update_Information_page.dart';
-import 'package:fat_app/view/liveStreamPage.dart';
-import 'package:fat_app/view/Student/class_schedule_page.dart';
-import 'package:fat_app/view/Student/course_page.dart';
-import 'package:fat_app/view/Student/interact_learning_page.dart';
-import 'constants/routes.dart';
 import 'package:google_fonts/google_fonts.dart';
-// List<CameraDescrifption>? cameras;
 
 Future<void> main() async {
   if (kIsWeb) {
@@ -48,71 +31,8 @@ Future<void> main() async {
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       useMaterial3: true,
     ),
-    home: const HomePage(),
-    routes: {
-      livestreampage: (context) => LiveStreamPage(),
-      classschedulePage: (context) => const ClassSchedulePage(),
-      coursepage: (context) => CoursePage(
-            course: Course(
-              id: '',
-              subject: '',
-              teacher: '',
-              startDate: '',
-              endDate: '',
-              price: 0.0,
-              description: '',
-              creatorId: '',
-              createdAt: Timestamp.now(),
-              chapterId: [],
-            ),
-          ),
-
-      fatutorpage: (context) => const TutorListPage(),
-      interactlearningpage: (context) => const InteractLearningPage(),
-      loginRoutes: (context) => LoginPage(),
-      registerRoutes: (context) => Register(),
-      emailverifyRoute: (context) => const EmailVerify(),
-      paymentRoutes: (context) => PaymentMethodScreen(),
-      updateinformationRoutes: (context) => UpdateInformationPage(),
-      interactlearninteachergpage: (context) =>
-          const InteractLearningTeacherPage(),
-      chatpage: (context) => ChatRoomsPage(),
-      chatteacherPage: (context) => TutorChatRoomsPage(),
-      classscheduleteacherpage: (context) => const classscheduleteacherPage(),
-      courseteacherpage: (context) => courseteacherPage(
-            course: Course(
-              id: '',
-              subject: '',
-              teacher: '',
-              startDate: '',
-              endDate: '',
-              price: 0.0,
-              description: '',
-              creatorId: '',
-              createdAt: Timestamp.now(),
-              chapterId: [],
-            ),
-          ),
-      // teacherliverecord: (context) => TeacherScreen(
-      //       lessonId: 0,
-      //     ),
-      listlectureRoutes: (context) => LectureListScreen(
-            chapterId: [0],
-            course: Course(
-              id: '',
-              subject: '',
-              teacher: '',
-              startDate: '',
-              endDate: '',
-              price: 0.0,
-              description: '',
-              creatorId: '',
-              createdAt: Timestamp.now(),
-              chapterId: ['0'],
-            ),
-          ),
-      // teacherlive: (context) => TeacherScreenLive(cameras: cameras!),
-    },
+    home: const AuthStateHandler(),
+    routes: appRoutes,
   ));
 }
 

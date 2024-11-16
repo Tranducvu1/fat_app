@@ -1,8 +1,6 @@
 import 'package:fat_app/intro_screens/intro_page1.dart';
 import 'package:fat_app/intro_screens/intro_page2.dart';
 import 'package:fat_app/intro_screens/intro_page3.dart';
-import 'package:fat_app/main.dart';
-import 'package:fat_app/view_auth/LoginPage.dart';
 import 'package:fat_app/view_auth/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
