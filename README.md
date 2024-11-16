@@ -21,11 +21,10 @@
 - **Reports & Analytics**: Access detailed reports about platform activities.
 
 ## 🚀 **Technologies Used**
-- **Frontend**: React Native (Mobile) and React/Angular/Vue (Web).
-- **Backend**: Node.js with Firebase for real-time functionality.
+- **Frontend**: Flutter.
+- **Backend**: Firebase for real-time functionality.
 - **Database**: Firebase Firestore.
-- **Live Streaming**: Integrated with [specify API or streaming service].
-- **Web Admin Panel**: Built using [React/Angular/Vue].
+- **Live Streaming**: Integrated with zego_zim.
 
 ## 🔧 **Installation**
 1. **Clone the repository**:
@@ -44,7 +43,7 @@
 
 
 ## 🌟 **How to Use**
-- **Students**: Sign up, search for tutors or courses, and start learning immediately.
+- **Students**: Sign up, search for tutors or courses,watch lesson, make quiz, and start learning immediately.
 - **Tutors**: Register an account, create your profile and courses, or host live-stream sessions.
 - **Administrators**: Use the web admin portal to manage accounts and courses effectively.
 
