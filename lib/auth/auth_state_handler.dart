@@ -1,31 +1,65 @@
-import 'package:fat_app/view/loading/loading_view.dart';
-import 'package:fat_app/view/update_Information_page.dart';
-import 'package:fat_app/view_auth/EmailVerify.dart';
-import 'package:fat_app/view_auth/login_view.dart';
-import 'package:fat_app/view_auth/register_view.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+// Importing necessary packages and files for the app
+import 'package:fat_app/view/introduction_screen.dart'; // Screen for onboarding/introduction
+import 'package:fat_app/view/loading/loading_first_view.dart'; // Initial loading screen
+import 'package:fat_app/view_auth/EmailVerify.dart'; // Screen for email verification
+import 'package:fat_app/view_auth/login_view.dart'; // Login screen
+import 'package:fat_app/view_auth/register_view.dart'; // Registration screen
+import 'package:firebase_auth/firebase_auth.dart'; // Firebase Authentication SDK
+import 'package:flutter/material.dart'; // Core Flutter framework
+import 'package:shared_preferences/shared_preferences.dart'; // For local key-value storage
 
-class AuthStateHandler extends StatelessWidget {
+// Main handler for authentication and navigation states
+class AuthStateHandler extends StatefulWidget {
   const AuthStateHandler({Key? key}) : super(key: key);
+
+  @override
+  State<AuthStateHandler> createState() => _AuthStateHandlerState();
+}
+
+class _AuthStateHandlerState extends State<AuthStateHandler> {
+  bool _isFirstTime =
+      true; // Tracks whether the app is opened for the first time
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstTime(); // Initialize check for the first-time flag
+  }
+
+  // Asynchronously checks if it's the user's first time opening the app
+  Future<void> _checkFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isFirstTime = prefs.getBool('isFirstTime') ??
+          true; // Default to true if key is absent
+    });
+  }
+
+  // Asynchronously sets the first-time flag to false after the initial app launch
+  Future<void> _setFirstTimeFalse() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstTime', false); // Persist data locally
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
+      stream: FirebaseAuth.instance
+          .authStateChanges(), // Observes auth state changes
       builder: (context, snapshot) {
-        // Check if the snapshot has user data
-        if (snapshot.hasData) {
-          // User is logged in, check email verification
-          if (FirebaseAuth.instance.currentUser!.emailVerified) {
-            // Navigate to the main content (you can change this to your desired page)
-            return Register();
-          } else {
-            // Email not verified
-            return const EmailVerify();
-          }
+        // Show loading screen while waiting for Firebase response
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const LoadingViewFirst();
         }
-        // User is not logged in
-        return LoginPage();
+
+        // Navigate to onboarding if this is the first app launch
+        if (_isFirstTime) {
+          _setFirstTimeFalse(); // Update the first-time flag
+          return OnboardingScreen(); // Show onboarding screen
+        } else {
+          // Navigate to login if no user is logged in
+          return LoginPage();
+        }
       },
     );
   }

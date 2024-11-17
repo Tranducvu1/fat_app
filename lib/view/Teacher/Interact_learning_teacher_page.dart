@@ -460,22 +460,22 @@ class _InteractLearningPageState extends State<InteractLearningTeacherPage> {
       child: CustomBottomNavigationTeacherBar(
         currentIndex: 0,
         onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.of(context).pushNamed('/teacherinteractlearning');
-              break;
-            case 1:
-              Navigator.of(context).pushNamed('/teacherclassschedule');
-              break;
-            case 2:
-              Navigator.of(context).pushNamed('/teachercourse');
-              break;
-            case 3:
-              Navigator.of(context).pushNamed('/teacherchat');
-              break;
-          }
+          setState(() => currentIndex = index);
+          _navigateToPage(index);
         },
       ),
     );
+  }
+
+  void _navigateToPage(int index) {
+    final routes = [
+      '/teacherinteractlearning',
+      '/teacherclassschedule',
+      '/teachercourse',
+      '/teacherchat',
+    ];
+    if (index >= 0 && index < routes.length) {
+      Navigator.of(context).pushReplacementNamed(routes[index]);
+    }
   }
 }

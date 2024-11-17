@@ -4,7 +4,7 @@ import 'package:fat_app/service/user_service.dart';
 import 'package:fat_app/view/Student/interact_learning_page.dart';
 import 'package:fat_app/view/Teacher/Interact_learning_teacher_page.dart';
 import 'package:fat_app/view/admin/main_screen.dart';
-import 'package:fat_app/view/loading/loading_teacher_view.dart';
+import 'package:fat_app/view/loading/loading_first_view.dart';
 import 'package:fat_app/view/loading/loading_view.dart';
 import 'package:fat_app/view_auth/register_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -322,11 +322,14 @@ class _LoginPageState extends State<LoginPage> {
 
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithCredential(credential);
-
+      String role = "Student";
       // In ra tên người dùng sau khi đăng nhập thành công
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => LoadingTeacherView(duration: 3000),
+          builder: (context) => LoadingView(
+            duration: 3000,
+            role: role,
+          ),
         ),
       );
       // Chuyển hướng sang HomePage sau khi đăng nhập thành công

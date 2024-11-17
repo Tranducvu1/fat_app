@@ -351,7 +351,7 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
         height: 140,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),

@@ -301,7 +301,7 @@ class _ClassSchedulePage extends State<classscheduleteacherPage> {
       '/teacherchat',
     ];
     if (index >= 0 && index < routes.length) {
-      Navigator.of(context).pushNamed(routes[index]);
+      Navigator.of(context).pushReplacementNamed(routes[index]);
     }
   }
 }
