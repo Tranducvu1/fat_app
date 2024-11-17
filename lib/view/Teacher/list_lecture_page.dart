@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fat_app/Model/chapter.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/Model/lesson.dart';
@@ -5,18 +6,19 @@ import 'package:fat_app/service/chapter_service.dart';
 import 'package:fat_app/view/Student/quiz_page.dart';
 import 'package:fat_app/view/Teacher/add_chapter_form.dart';
 import 'package:fat_app/view/Teacher/add_lesson_form.dart';
+import 'package:fat_app/view/Teacher/add_question_page.dart';
 import 'package:fat_app/view/Teacher/teacher_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fat_app/view/live/live.dart';
 
 class LectureListTeacherScreen extends StatelessWidget {
   final ChapterService _chapterService = ChapterService();
-  final List<int> chapterId;
+  final List<int>? chapterId;
   final Course course;
 
   LectureListTeacherScreen({
     Key? key,
-    required this.chapterId,
+    this.chapterId,
     required this.course,
   }) : super(key: key);
 
@@ -25,7 +27,7 @@ class LectureListTeacherScreen extends StatelessWidget {
     print("Received chapterId: $chapterId");
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: _buildChapterList(),
+      body: _buildChapterList(context),
     );
   }
 
@@ -75,12 +77,44 @@ class LectureListTeacherScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChapterList() {
+  Widget _buildChapterList(BuildContext context) {
+    if (chapterId == null || chapterId!.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('No chapters available'),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                // Navigate to add chapter form
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => AddChapterForm(
+                      onChapterAdded: () {},
+                      courseId: course.creatorId,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Add Chapter'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return StreamBuilder<List<Chapter>>(
-      stream: _chapterService.getChaptersForCourse(chapterId),
+      stream: _chapterService.getChaptersForCourse(chapterId!),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(child: Text('Error loading chapters'));
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}', // Hiển thị thông báo lỗi chi tiết
+              style: TextStyle(color: Colors.red),
+            ),
+          );
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -112,7 +146,7 @@ class LectureListTeacherScreen extends StatelessWidget {
               chapter: snapshot.data![index],
               chapterService: _chapterService,
               course: course,
-              lessonId: chapterId,
+              lessonId: chapterId!,
             );
           },
         );
@@ -146,6 +180,7 @@ class ChapterTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("Chapter ${chapter.chapterId} has lesson_IDs: ${chapter.lessonId}");
     return Column(
       children: [
         ExpansionTile(
@@ -159,25 +194,27 @@ class ChapterTile extends StatelessWidget {
           ),
           children: [
             _buildLessonList(),
-            // Add Lesson Button
+            // Add Lesson and Quiz Buttons Row
             Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
                           builder: (context) => AddLessonForm(
-                                chapterId: chapter.chapterId,
-                                onLessonAdded: () {},
-                              )),
-                    );
-                  },
-                  tooltip: 'Add Lesson',
-                ),
+                            chapterId: chapter.chapterId,
+                            onLessonAdded: () {},
+                          ),
+                        ),
+                      );
+                    },
+                    tooltip: 'Add Lesson',
+                  ),
+                ],
               ),
             ),
           ],
@@ -188,8 +225,10 @@ class ChapterTile extends StatelessWidget {
   }
 
   Widget _buildLessonList() {
+    print(' lesson id :${chapter.lessonId.map(int.parse).toList()}');
     return StreamBuilder<List<Lesson>>(
-      stream: chapterService.getLessonsForChapters(lessonId),
+      stream: chapterService
+          .getLessonsForChapters(chapter.lessonId.map(int.parse).toList()),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const ListTile(title: Text('Error loading lessons'));
@@ -221,8 +260,17 @@ class LessonTile extends StatelessWidget {
     required this.lesson,
   }) : super(key: key);
 
+  Stream<int> getQuestionCount() {
+    return FirebaseFirestore.instance
+        .collection('questions')
+        .where('lessonId', isEqualTo: lesson.lesson_ID)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
+
   @override
   Widget build(BuildContext context) {
+    print('Thông tin lesson_ID: ${lesson.questionid}');
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 32.0),
       title: Text(
@@ -243,22 +291,92 @@ class LessonTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-              icon: const Icon(Icons.video_library_outlined, size: 20),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          TeacherScreen(lessonId: lesson.lesson_ID)),
-                );
-              }),
-          IconButton(
-            icon: const Icon(Icons.quiz_outlined, size: 20),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) =>
-                    QuizPage(lessonId: lesson.lesson_ID.toString()),
-              ),
-            ),
+            icon: const Icon(Icons.video_library_outlined, size: 20),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      TeacherScreen(lessonId: lesson.lesson_ID),
+                ),
+              );
+            },
+          ),
+          // Wrapped Quiz button with StreamBuilder to show question count
+          StreamBuilder<int>(
+            stream: getQuestionCount(),
+            builder: (context, snapshot) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.quiz_outlined, size: 20),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Quiz Options'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: Icon(Icons.add_circle_outline),
+                                title: Text('Add Questions'),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AddQuestionPage(
+                                        lessonId: lesson.lesson_ID.toString(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              ListTile(
+                                leading: Icon(Icons.play_arrow),
+                                title: Text('Start Quiz'),
+                                onTap: () {
+                                  print('trỏ tới :${lesson.lesson_ID}');
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => QuestionPage(
+                                        lessonId: lesson.questionid,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  if (snapshot.hasData && snapshot.data! > 0)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${snapshot.data}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),

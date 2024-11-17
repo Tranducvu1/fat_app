@@ -105,7 +105,7 @@ class LectureListScreen extends StatelessWidget {
               chapter: snapshot.data![index],
               chapterService: _chapterService,
               course: course,
-              lessonId: chapterId,
+              chapterId: chapterId,
             );
           },
         );
@@ -118,18 +118,19 @@ class ChapterTile extends StatelessWidget {
   final Chapter chapter;
   final ChapterService chapterService;
   final Course course;
-  final List<int> lessonId;
+  final List<int> chapterId;
 
   const ChapterTile({
     Key? key,
     required this.chapter,
     required this.chapterService,
     required this.course,
-    required this.lessonId,
+    required this.chapterId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    print('chapter id :${chapterId}');
     return Column(
       children: [
         ExpansionTile(
@@ -152,7 +153,7 @@ class ChapterTile extends StatelessWidget {
 
   Widget _buildLessonList() {
     return StreamBuilder<List<Lesson>>(
-      stream: chapterService.getLessonsForChapters(lessonId),
+      stream: chapterService.getLessonsForChapters(chapterId),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const ListTile(title: Text('Error loading lessons'));
@@ -166,10 +167,15 @@ class ChapterTile extends StatelessWidget {
           return const ListTile(title: Text('No lessons available'));
         }
 
-        return Column(
-          children: snapshot.data!
-              .map((lesson) => LessonTile(lesson: lesson))
-              .toList(),
+        return ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            return LessonTile(
+              lesson: snapshot.data![index],
+              lessonId: [snapshot.data![index].lesson_ID],
+            );
+          },
         );
       },
     );
@@ -178,14 +184,17 @@ class ChapterTile extends StatelessWidget {
 
 class LessonTile extends StatelessWidget {
   final Lesson lesson;
+  final List<int> lessonId;
 
   const LessonTile({
     Key? key,
     required this.lesson,
+    required this.lessonId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    print(lessonId);
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 32.0),
       title: Text(
@@ -217,8 +226,7 @@ class LessonTile extends StatelessWidget {
             icon: const Icon(Icons.quiz_outlined, size: 20),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) =>
-                    QuizPage(lessonId: lesson.lesson_ID.toString()),
+                builder: (context) => QuestionPage(lessonId: lesson.questionid),
               ),
             ),
           ),

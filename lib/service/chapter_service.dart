@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fat_app/Model/chapter.dart';
 import 'package:fat_app/Model/lesson.dart';
+import 'package:fat_app/Model/question.dart';
 
 class ChapterService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -43,8 +44,30 @@ class ChapterService {
     });
   }
 
+  Stream<List<Question>> getQuestionorLesson(List<int> chapterIds) {
+    print('Fetching chapters for course: $chapterIds');
+    return _firestore
+        .collection('questions')
+        .where('id', whereIn: chapterIds)
+        .orderBy('id')
+        .snapshots()
+        .map((snapshot) {
+      print('Received snapshot with ${snapshot.docs.length} docs');
+      return snapshot.docs.map((doc) {
+        var data = doc.data();
+        print('Document data: $data');
+        return Question.fromMap({...data, 'id': doc.id});
+      }).toList();
+    });
+  }
+
   Stream<List<Lesson>> getLessonsForChapters(List<int> lessonIds) {
-    print('Fetching lessons for chapter: $lessonIds'); // Log lessonIds
+    print('Fetching lessons for chapters: $lessonIds');
+
+    if (lessonIds.isEmpty) {
+      return Stream.value([]);
+    }
+
     return _firestore
         .collection('lesson')
         .where('lesson_ID', whereIn: lessonIds)
@@ -81,7 +104,7 @@ class ChapterService {
 
       // Update the lesson_ID array field of the chapter document
       await chapterDoc.reference.update({
-        'lesson_ID': FieldValue.arrayUnion([lessonId])
+        'lesson_ID': FieldValue.arrayUnion([lessonId.toString()])
       });
 
       print('Lesson ID added to chapter successfully!');

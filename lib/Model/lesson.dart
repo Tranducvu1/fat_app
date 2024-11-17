@@ -5,14 +5,15 @@ class Lesson {
   final String lessonName;
   final String video;
   final String? createdAt;
+  final List<String> questionid;
 
-  Lesson({
-    required this.lesson_ID,
-    required this.description,
-    required this.lessonName,
-    required this.video,
-    this.createdAt,
-  });
+  Lesson(
+      {required this.lesson_ID,
+      required this.description,
+      required this.lessonName,
+      required this.video,
+      this.createdAt,
+      required this.questionid});
 
   factory Lesson.fromMap(Map<String, dynamic> map) {
     return Lesson(
@@ -21,6 +22,7 @@ class Lesson {
       lessonName: map['lessonName'] ?? '',
       video: map['video'] ?? '',
       createdAt: map['createdAt'],
+      questionid: List<String>.from(map['Question_ID'] ?? []),
     );
   }
 
@@ -31,6 +33,7 @@ class Lesson {
       'lessonName': lessonName,
       'video': video,
       'createdAt': createdAt,
+      'Question_ID': questionid
     };
   }
 }

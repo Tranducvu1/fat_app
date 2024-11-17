@@ -5,7 +5,6 @@ class Question {
   final String question;
   final List<String> answers;
   final int correctAnswer;
-  final String lessonId;
   final Timestamp createdAt;
   final String createdBy;
   final bool isActive;
@@ -15,7 +14,6 @@ class Question {
     required this.question,
     required this.answers,
     required this.correctAnswer,
-    required this.lessonId,
     required this.createdAt,
     required this.createdBy,
     this.isActive = true,
@@ -27,7 +25,6 @@ class Question {
       'question': question,
       'answers': answers,
       'correctAnswer': correctAnswer,
-      'lessonId': lessonId,
       'createdAt': createdAt,
       'createdBy': createdBy,
       'isActive': isActive,
@@ -40,7 +37,6 @@ class Question {
       question: map['question'] ?? '',
       answers: List<String>.from(map['answers'] ?? []),
       correctAnswer: map['correctAnswer']?.toInt() ?? 0,
-      lessonId: map['lessonId'] ?? '',
       createdAt: map['createdAt'] ?? Timestamp.now(),
       createdBy: map['createdBy'] ?? '',
       isActive: map['isActive'] ?? true,
@@ -62,7 +58,6 @@ class Question {
       question: question ?? this.question,
       answers: answers ?? this.answers,
       correctAnswer: correctAnswer ?? this.correctAnswer,
-      lessonId: lessonId ?? this.lessonId,
       createdAt: createdAt ?? this.createdAt,
       createdBy: createdBy ?? this.createdBy,
       isActive: isActive ?? this.isActive,

@@ -1,9 +1,8 @@
 // Importing necessary packages and files for the app
 import 'package:fat_app/view/introduction_screen.dart'; // Screen for onboarding/introduction
 import 'package:fat_app/view/loading/loading_first_view.dart'; // Initial loading screen
-import 'package:fat_app/view_auth/EmailVerify.dart'; // Screen for email verification
+// Screen for email verification
 import 'package:fat_app/view_auth/login_view.dart'; // Login screen
-import 'package:fat_app/view_auth/register_view.dart'; // Registration screen
 import 'package:firebase_auth/firebase_auth.dart'; // Firebase Authentication SDK
 import 'package:flutter/material.dart'; // Core Flutter framework
 import 'package:shared_preferences/shared_preferences.dart'; // For local key-value storage
@@ -51,7 +50,6 @@ class _AuthStateHandlerState extends State<AuthStateHandler> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const LoadingViewFirst();
         }
-
         // Navigate to onboarding if this is the first app launch
         if (_isFirstTime) {
           _setFirstTimeFalse(); // Update the first-time flag

@@ -1,92 +1,65 @@
-// services/quiz_service.dart
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fat_app/Model/lesson.dart';
-import 'package:fat_app/Model/question.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore package for accessing Cloud Firestore
+import 'package:fat_app/Model/question.dart'; // Import the Question model to map data to/from Firestore
+import 'package:firebase_auth/firebase_auth.dart'; // Firebase Authentication for getting the current user's ID
+import 'package:uuid/uuid.dart'; // UUID package to generate unique IDs for new questions
 
-class QuizService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+class QuestionService {
+  // Method to add a new question to the database and associate it with a lesson
+  Future<void> addQuestion(String lessonId, String questionText,
+      List<String> answers, int correctAnswer) async {
+    // Create a new question object with the provided details
+    final question = Question(
+      id: const Uuid().v4(), // Generate a unique ID for the question
+      question: questionText, // The question text provided by the user
+      answers: answers, // List of possible answers
+      correctAnswer:
+          correctAnswer, // The index of the correct answer in the list
+      createdAt: Timestamp.fromDate(
+          DateTime.now()), // Timestamp when the question is created
+      createdBy: FirebaseAuth.instance.currentUser!
+          .uid, // The ID of the user who created the question
+    );
 
-  final String questionCollection = 'questions';
-  late final Lesson lessonTile;
-  Future<void> addQuestion(Question question) async {
     try {
-      await _firestore
-          .collection(questionCollection)
-          .doc(question.id)
-          .set(question.toMap());
-    } catch (e) {
-      print('Error adding question: $e');
-      rethrow;
-    }
-  }
+      // Add the question to the 'questions' collection in Firestore
+      await FirebaseFirestore.instance
+          .collection('questions')
+          .doc(question.id) // Use the unique question ID as the document ID
+          .set(question
+              .toMap()); // Map the question object to a Firestore document
 
-  Future<void> updateQuestion(Question question) async {
-    try {
-      await _firestore
-          .collection(questionCollection)
-          .doc(question.id)
-          .update(question.toMap());
-    } catch (e) {
-      print('Error updating question: $e');
-      rethrow;
-    }
-  }
+      print("Lesson ID: $lessonId");
 
-  Future<void> deleteQuestion(String questionId) async {
-    try {
-      await _firestore
-          .collection(questionCollection)
-          .doc(questionId)
-          .update({'isActive': false});
-    } catch (e) {
-      print('Error deleting question: $e');
-      rethrow;
-    }
-  }
-
-  Future<List<Question>> getQuestions() async {
-    try {
-      final querySnapshot = await _firestore
-          .collection(questionCollection)
-          .where('lessonId', isEqualTo: lessonTile.lesson_ID)
-          .where('isActive', isEqualTo: true)
-          .where('createdBy', isEqualTo: lessonTile.createdAt)
+      // Query the 'lesson' collection to find the lesson document that matches the provided lessonId
+      final lessonQuerySnapshot = await FirebaseFirestore.instance
+          .collection('lesson')
+          .where('lesson_ID',
+              isEqualTo: int.parse(
+                  lessonId)) // Compare 'lesson_ID' field with lessonId
           .get();
 
-      return querySnapshot.docs
-          .map((doc) => Question.fromMap(doc.data(), docId: doc.id))
-          .toList();
-    } catch (e) {
-      print('Error getting questions: $e');
-      return [];
-    }
-  }
+      if (lessonQuerySnapshot.docs.isNotEmpty) {
+        // If at least one lesson document is found that matches the lessonId
+        final lessonDocRef = lessonQuerySnapshot.docs.first
+            .reference; // Get the reference to the first matching lesson document
 
-  // Lưu kết quả bài làm
-  Future<void> saveQuizResult(QuizResult result) async {
-    try {
-      await _firestore.collection('quiz_results').add(result.toMap());
-    } catch (e) {
-      print('Error saving quiz result: $e');
-      throw e;
-    }
-  }
+        // Update the 'Question_ID' field of the lesson document by adding the new question's ID
+        await lessonDocRef.update({
+          'Question_ID': FieldValue.arrayUnion([
+            question.id
+          ]), // Add the question ID to the array of Question_IDs
+        });
 
-  // Lấy lịch sử làm bài của user
-  Future<List<QuizResult>> getUserQuizHistory(String userId) async {
-    try {
-      final querySnapshot = await _firestore
-          .collection('quiz_results')
-          .where('userId', isEqualTo: userId)
-          .orderBy('completedAt', descending: true)
-          .get();
-
-      return querySnapshot.docs
-          .map((doc) => QuizResult.fromMap(doc.data()))
-          .toList();
+        // Fetch the updated lesson document to verify the update
+        final updatedLessonDoc = await lessonDocRef.get();
+        print("After update, Lesson data: ${updatedLessonDoc.data()}");
+      } else {
+        // If no matching lesson document is found, throw an error
+        throw Exception('No lesson found with this ID!');
+      }
     } catch (e) {
-      print('Error getting quiz history: $e');
-      return [];
+      // Re-throw any caught exceptions
+      rethrow;
     }
   }
 }

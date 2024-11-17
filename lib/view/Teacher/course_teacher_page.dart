@@ -276,6 +276,7 @@ class _CoursePage extends State<courseteacherPage> {
     return GestureDetector(
       onTap: () {
         if (course.chapterId.isNotEmpty) {
+          print('Chapter IDs: ${course.chapterId}');
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => LectureListTeacherScreen(
@@ -285,18 +286,12 @@ class _CoursePage extends State<courseteacherPage> {
             ),
           );
         } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('No Lectures Available'),
-              content:
-                  const Text('No lectures have been added to this course yet.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('OK'),
-                ),
-              ],
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => LectureListTeacherScreen(
+                course: course,
+                // Don't pass chapterId
+              ),
             ),
           );
         }

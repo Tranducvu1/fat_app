@@ -68,7 +68,7 @@ class _AddLessonFormState extends State<AddLessonForm> {
           lessonName: _lessonNameController.text,
           description: _descriptionController.text,
           video: videoUrl, // Store the video ID instead of full URL
-          createdAt: DateTime.now().toIso8601String(),
+          createdAt: DateTime.now().toIso8601String(), questionid: [],
         );
 
         // Add lesson to Firestore
