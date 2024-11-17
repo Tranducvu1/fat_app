@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fat_app/Model/chapter.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/Model/lesson.dart';
@@ -9,12 +10,12 @@ import 'package:flutter/material.dart';
 
 class LectureListScreen extends StatelessWidget {
   final ChapterService _chapterService = ChapterService();
-  final List<int> chapterId;
+  final List<int>? chapterId;
   final Course course;
 
   LectureListScreen({
     Key? key,
-    required this.chapterId,
+    this.chapterId,
     required this.course,
   }) : super(key: key);
 
@@ -23,7 +24,7 @@ class LectureListScreen extends StatelessWidget {
     print("Received chapterId: $chapterId");
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: _buildChapterList(),
+      body: _buildChapterList(context),
     );
   }
 
@@ -39,10 +40,10 @@ class LectureListScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: ElevatedButton.icon(
             onPressed: () {
-              jumToLivePage(context, isHost: false);
+              jumToLivePage(context, isHost: true);
             },
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Watch'),
+            label: const Text('Starting live'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey[200],
               foregroundColor: Colors.black,
@@ -59,21 +60,28 @@ class LectureListScreen extends StatelessWidget {
     );
   }
 
-  void jumToLivePage(BuildContext context, {required bool isHost}) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LivePage(isHost: isHost),
-      ),
-    );
-  }
+  Widget _buildChapterList(BuildContext context) {
+    if (chapterId == null || chapterId!.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('No chapters available'),
+          ],
+        ),
+      );
+    }
 
-  Widget _buildChapterList() {
     return StreamBuilder<List<Chapter>>(
-      stream: _chapterService.getChaptersForCourse(chapterId),
+      stream: _chapterService.getChaptersForCourse(chapterId!),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(child: Text('Error loading chapters'));
+          return Center(
+            child: Text(
+              'Error: ${snapshot.error}', // Hiển thị thông báo lỗi chi tiết
+              style: TextStyle(color: Colors.red),
+            ),
+          );
         }
 
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -105,11 +113,20 @@ class LectureListScreen extends StatelessWidget {
               chapter: snapshot.data![index],
               chapterService: _chapterService,
               course: course,
-              chapterId: chapterId,
+              lessonId: chapterId!,
             );
           },
         );
       },
+    );
+  }
+
+  void jumToLivePage(BuildContext context, {required bool isHost}) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LivePage(isHost: isHost),
+      ),
     );
   }
 }
@@ -118,19 +135,19 @@ class ChapterTile extends StatelessWidget {
   final Chapter chapter;
   final ChapterService chapterService;
   final Course course;
-  final List<int> chapterId;
+  final List<int> lessonId;
 
   const ChapterTile({
     Key? key,
     required this.chapter,
     required this.chapterService,
     required this.course,
-    required this.chapterId,
+    required this.lessonId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    print('chapter id :${chapterId}');
+    print("Chapter ${chapter.chapterId} has lesson_IDs: ${chapter.lessonId}");
     return Column(
       children: [
         ExpansionTile(
@@ -152,8 +169,10 @@ class ChapterTile extends StatelessWidget {
   }
 
   Widget _buildLessonList() {
+    print(' lesson id :${chapter.lessonId.map(int.parse).toList()}');
     return StreamBuilder<List<Lesson>>(
-      stream: chapterService.getLessonsForChapters(chapterId),
+      stream: chapterService
+          .getLessonsForChapters(chapter.lessonId.map(int.parse).toList()),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const ListTile(title: Text('Error loading lessons'));
@@ -167,15 +186,10 @@ class ChapterTile extends StatelessWidget {
           return const ListTile(title: Text('No lessons available'));
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: snapshot.data!.length,
-          itemBuilder: (context, index) {
-            return LessonTile(
-              lesson: snapshot.data![index],
-              lessonId: [snapshot.data![index].lesson_ID],
-            );
-          },
+        return Column(
+          children: snapshot.data!
+              .map((lesson) => LessonTile(lesson: lesson))
+              .toList(),
         );
       },
     );
@@ -184,17 +198,23 @@ class ChapterTile extends StatelessWidget {
 
 class LessonTile extends StatelessWidget {
   final Lesson lesson;
-  final List<int> lessonId;
 
   const LessonTile({
     Key? key,
     required this.lesson,
-    required this.lessonId,
   }) : super(key: key);
+
+  Stream<int> getQuestionCount() {
+    return FirebaseFirestore.instance
+        .collection('questions')
+        .where('lessonId', isEqualTo: lesson.lesson_ID)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
 
   @override
   Widget build(BuildContext context) {
-    print(lessonId);
+    print('Thông tin lesson_ID: ${lesson.questionid}');
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 32.0),
       title: Text(
@@ -216,19 +236,76 @@ class LessonTile extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.video_library_outlined, size: 20),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
                   builder: (context) =>
-                      TeacherScreen(lessonId: lesson.lesson_ID)),
-            ),
+                      TeacherScreen(lessonId: lesson.lesson_ID),
+                ),
+              );
+            },
           ),
-          IconButton(
-            icon: const Icon(Icons.quiz_outlined, size: 20),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => QuestionPage(lessonId: lesson.questionid),
-              ),
-            ),
+          // Wrapped Quiz button with StreamBuilder to show question count
+          StreamBuilder<int>(
+            stream: getQuestionCount(),
+            builder: (context, snapshot) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.quiz_outlined, size: 20),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text('Quiz Options'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                leading: Icon(Icons.play_arrow),
+                                title: Text('Start Quiz'),
+                                onTap: () {
+                                  print('trỏ tới :${lesson.lesson_ID}');
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => QuestionPage(
+                                        lessonId: lesson.questionid,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  if (snapshot.hasData && snapshot.data! > 0)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '${snapshot.data}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),

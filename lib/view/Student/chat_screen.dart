@@ -73,6 +73,7 @@ class _ChatRoomState extends State<ChatRoom> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text("${widget.otherUserName}"),
       ),

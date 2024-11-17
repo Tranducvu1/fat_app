@@ -75,6 +75,7 @@ class _ChatTeacherRoomState extends State<ChatTeacherRoom> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Row(
           children: [

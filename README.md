@@ -41,9 +41,8 @@
      flutter run
      ```
 
-
 ## 🌟 **How to Use**
-- **Students**: Sign up, search for tutors or courses,watch lesson, make quiz, and start learning immediately.
+- **Students**: Sign up, search for tutors or courses, watch lessons, make quizzes, and start learning immediately.
 - **Tutors**: Register an account, create your profile and courses, or host live-stream sessions.
 - **Administrators**: Use the web admin portal to manage accounts and courses effectively.
 
@@ -61,4 +60,16 @@ Fat_App is developed and maintained by [Trần Đức Vũ leader]. All rights re
 
 ---
 
-Start your journey with **Fat_App** today and experience the future of online learning!
+### **User Credentials** (for Testing/Development):
+
+#### Student:
+- **Username**: `tranducvuht@gmail.com`
+- **Password**: `0345934782`
+
+#### Teacher/Tutor:
+- **Username**: `a@gmail.com`
+- **Password**: `123456`
+
+#### Admin:
+- **Username**: `admin@gmail.com`
+- **Password**: `0345934782`
