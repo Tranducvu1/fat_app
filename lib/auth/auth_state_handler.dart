@@ -1,4 +1,5 @@
 // Importing necessary packages and files for the app
+import 'package:fat_app/main.dart';
 import 'package:fat_app/view/introduction_screen.dart'; // Screen for onboarding/introduction
 import 'package:fat_app/view/loading/loading_first_view.dart'; // Initial loading screen
 // Screen for email verification
@@ -53,7 +54,7 @@ class _AuthStateHandlerState extends State<AuthStateHandler> {
         // Navigate to onboarding if this is the first app launch
         if (_isFirstTime) {
           _setFirstTimeFalse(); // Update the first-time flag
-          return OnboardingScreen(); // Show onboarding screen
+          return HomePage(); // Show onboarding screen
         } else {
           // Navigate to login if no user is logged in
           return LoginPage();
