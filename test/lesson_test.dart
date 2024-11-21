@@ -1,4 +1,4 @@
-import 'package:fat_app/view/Teacher/add_lesson_form.dart';
+import 'package:fat_app/view/Teacher/Lesson/add_lesson_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';

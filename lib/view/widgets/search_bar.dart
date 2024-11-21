@@ -25,11 +25,17 @@ class SearchBarWidget extends StatelessWidget {
           const Icon(Icons.search, color: Colors.grey),
           const SizedBox(width: 8.0),
           Expanded(
-            child: TextField(
-              onChanged: onSearch,
-              decoration: const InputDecoration(
-                hintText: 'Search for ...',
-                border: InputBorder.none,
+            child: GestureDetector(
+              onTap: () {
+                // Navigate to the search screen when the search bar is tapped
+                Navigator.of(context).pushNamed('/findatutor');
+              },
+              // Placeholder text for the search bar
+              child: const Text(
+                'Search for ...',
+                style: TextStyle(
+                    color:
+                        Colors.grey), // Grey color to indicate placeholder text
               ),
             ),
           ),

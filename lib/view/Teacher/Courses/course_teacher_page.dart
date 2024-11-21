@@ -1,6 +1,6 @@
 import 'package:fat_app/Model/courses.dart';
-import 'package:fat_app/view/Teacher/add_courses_screen.dart';
-import 'package:fat_app/view/Teacher/list_lecture_page.dart';
+import 'package:fat_app/view/Teacher/Courses/add_courses_screen.dart';
+import 'package:fat_app/view/Teacher/Chapter/list_lecture_page.dart';
 import 'package:fat_app/view/widgets/custom_teacher_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -127,6 +127,18 @@ class _CoursePage extends State<courseteacherPage> {
     return true;
   }
 
+  void _showAddchapterForm() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AddCoursesScreen(),
+      ),
+    );
+  }
+
+  void _handleNewCourses() {
+    setState(() {});
+  }
+
   Future<void> _refreshCourses() async {
     await _loadUserData();
   }
@@ -244,10 +256,12 @@ class _CoursePage extends State<courseteacherPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const AddCoursesScreen()),
+            MaterialPageRoute(
+              builder: (context) => const AddCoursesScreen(),
+            ),
           );
           if (result == true) {
-            _refreshCourses();
+            await _loadUserData();
           }
         },
         backgroundColor: Colors.blue,

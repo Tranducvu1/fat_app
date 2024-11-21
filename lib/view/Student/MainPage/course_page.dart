@@ -1,6 +1,6 @@
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/ultilities/Show_Error_Dialog.dart';
-import 'package:fat_app/view/Student/list_lecture_page.dart';
+import 'package:fat_app/view/Student/Chapter/list_lecture_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -88,20 +88,6 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
         });
       } catch (e) {
         print('Failed to fetch registered courses: $e');
-      }
-    }
-  }
-
-  Future<void> _registerCourse(String courseId) async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      try {
-        await _firestore.collection('Users').doc(user.uid).update({
-          'registeredCourses': FieldValue.arrayUnion([courseId]),
-        });
-        _fetchRegisteredCourses();
-      } catch (e) {
-        print('Failed to register course: $e');
       }
     }
   }
@@ -409,7 +395,7 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
               child: const Text('Có'),
               onPressed: () {
                 Navigator.of(context).pop();
-                _registerCourse(creatorId);
+
                 Navigator.of(context).pushNamed(
                   '/payment',
                   arguments: {

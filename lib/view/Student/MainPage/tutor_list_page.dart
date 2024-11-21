@@ -1,7 +1,7 @@
 import 'package:fat_app/Model/UserModel.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/Model/tutorData.dart';
-import 'package:fat_app/view/Student/tutor_detail_page.dart';
+import 'package:fat_app/view/Student/MainPage/tutor_detail_page.dart';
 
 import 'package:fat_app/view/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';

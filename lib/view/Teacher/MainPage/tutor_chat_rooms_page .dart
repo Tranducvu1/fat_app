@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fat_app/view/Teacher/chat_teacher_screen.dart';
+import 'package:fat_app/view/Teacher/Chatroom/chat_teacher_screen.dart';
 
 class TutorChatRoomsPage extends StatefulWidget {
   @override
@@ -35,6 +35,12 @@ class _TutorChatRoomsPageState extends State<TutorChatRoomsPage> {
     if (currentUserId.isEmpty) {
       return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pushReplacementNamed('/teachercourse');
+            },
+          ),
           title: const Text("Chat Rooms"),
           centerTitle: true,
         ),

@@ -70,12 +70,13 @@ class _AddCoursesScreenState extends State<AddCoursesScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Course added successfully!')),
           );
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         } catch (e) {
           debugPrint('Error saving course: $e');
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Failed to add course')),
           );
+          Navigator.of(context).pop(false);
         }
       }
     }

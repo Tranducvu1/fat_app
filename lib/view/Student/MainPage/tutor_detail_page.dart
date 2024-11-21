@@ -1,5 +1,5 @@
 import 'package:fat_app/Model/UserModel.dart';
-import 'package:fat_app/view/Student/chat_screen.dart';
+import 'package:fat_app/view/Student/Chatroom/chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

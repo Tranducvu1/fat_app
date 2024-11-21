@@ -1,5 +1,5 @@
-import 'package:fat_app/view/Student/interact_learning_page.dart';
-import 'package:fat_app/view/Teacher/Interact_learning_teacher_page.dart';
+import 'package:fat_app/view/Student/MainPage/interact_learning_page.dart';
+import 'package:fat_app/view/Teacher/MainPage/Interact_learning_teacher_page.dart';
 import 'package:fat_app/view/admin/main_screen.dart';
 import 'package:flutter/material.dart';
 

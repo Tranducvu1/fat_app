@@ -31,18 +31,6 @@ class LessonService {
     }
   }
 
-  // Add a new lesson
-  Future<void> addLesson(Lesson lesson) async {
-    try {
-      await _firestore
-          .collection('lesson')
-          .doc(lesson.lesson_ID.toString())
-          .set(lesson.toMap());
-    } catch (e) {
-      throw Exception('Failed to add lesson: $e');
-    }
-  }
-
   //Update an existing lesson
   Future<void> updateLesson(Lesson lesson) async {
     try {

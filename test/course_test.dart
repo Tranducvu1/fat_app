@@ -1,5 +1,5 @@
 import 'package:fat_app/Model/courses.dart';
-import 'package:fat_app/view/Teacher/add_courses_screen.dart';
+import 'package:fat_app/view/Teacher/Courses/add_courses_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:fat_app/service/courses_service.dart';

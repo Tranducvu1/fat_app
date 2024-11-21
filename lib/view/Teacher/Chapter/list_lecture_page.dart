@@ -3,28 +3,36 @@ import 'package:fat_app/Model/chapter.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/Model/lesson.dart';
 import 'package:fat_app/service/chapter_service.dart';
-import 'package:fat_app/view/Student/quiz_page.dart';
-import 'package:fat_app/view/Teacher/add_chapter_form.dart';
-import 'package:fat_app/view/Teacher/add_lesson_form.dart';
-import 'package:fat_app/view/Teacher/add_question_page.dart';
-import 'package:fat_app/view/Teacher/teacher_screen.dart';
+import 'package:fat_app/view/Student/Chapter/question_page.dart';
+import 'package:fat_app/view/Teacher/Chapter/add_chapter_form.dart';
+import 'package:fat_app/view/Teacher/Chatroom/teacher_screen.dart';
+import 'package:fat_app/view/Teacher/Lesson/add_lesson_form.dart';
+import 'package:fat_app/view/Teacher/question/add_question_page.dart';
+
 import 'package:flutter/material.dart';
 import 'package:fat_app/view/live/live.dart';
 
-class LectureListTeacherScreen extends StatelessWidget {
-  final ChapterService _chapterService = ChapterService();
+class LectureListTeacherScreen extends StatefulWidget {
   final List<int>? chapterId;
   final Course course;
 
-  LectureListTeacherScreen({
+  const LectureListTeacherScreen({
     Key? key,
     this.chapterId,
     required this.course,
   }) : super(key: key);
 
   @override
+  _LectureListTeacherScreenState createState() =>
+      _LectureListTeacherScreenState();
+}
+
+class _LectureListTeacherScreenState extends State<LectureListTeacherScreen> {
+  final ChapterService _chapterService = ChapterService();
+  List<Chapter> chapters = [];
+
+  @override
   Widget build(BuildContext context) {
-    print("Received chapterId: $chapterId");
     return Scaffold(
       appBar: _buildAppBar(context),
       body: _buildChapterList(context),
@@ -37,28 +45,17 @@ class LectureListTeacherScreen extends StatelessWidget {
         icon: const Icon(Icons.arrow_back),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      title: Text(course.subject),
+      title: Text(widget.course.subject),
       actions: [
         IconButton(
           icon: const Icon(Icons.add),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => AddChapterForm(
-                  onChapterAdded: () {},
-                  courseId: course.creatorId,
-                ),
-              ),
-            );
-          },
+          onPressed: () => _showAddChapterForm(context),
           tooltip: 'Add Chapter',
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: ElevatedButton.icon(
-            onPressed: () {
-              jumToLivePage(context, isHost: true);
-            },
+            onPressed: () => jumToLivePage(context, isHost: true),
             icon: const Icon(Icons.play_arrow),
             label: const Text('Starting live'),
             style: ElevatedButton.styleFrom(
@@ -70,49 +67,41 @@ class LectureListTeacherScreen extends StatelessWidget {
         IconButton(
           icon: const Icon(Icons.notifications_outlined),
           onPressed: () {
-            // TODO: Implement notifications
+            // Implement notifications
           },
         ),
       ],
     );
   }
 
-  Widget _buildChapterList(BuildContext context) {
-    if (chapterId == null || chapterId!.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('No chapters available'),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                // Navigate to add chapter form
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => AddChapterForm(
-                      onChapterAdded: () {},
-                      courseId: course.creatorId,
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Add Chapter'),
-            ),
-          ],
+  void _showAddChapterForm(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AddChapterForm(
+          onChapterAdded: _handleNewChapter,
+          courseId: widget.course.creatorId,
         ),
-      );
+      ),
+    );
+  }
+
+  void _handleNewChapter() {
+    setState(() {});
+  }
+
+  Widget _buildChapterList(BuildContext context) {
+    if (widget.chapterId == null || widget.chapterId!.isEmpty) {
+      return _buildEmptyState(context);
     }
 
     return StreamBuilder<List<Chapter>>(
-      stream: _chapterService.getChaptersForCourse(chapterId!),
+      stream: _chapterService.getChaptersForCourse(widget.chapterId!),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'Error: ${snapshot.error}', // Hiển thị thông báo lỗi chi tiết
-              style: TextStyle(color: Colors.red),
+              'Error: ${snapshot.error}',
+              style: const TextStyle(color: Colors.red),
             ),
           );
         }
@@ -121,36 +110,42 @@ class LectureListTeacherScreen extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('No chapters available'),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Chapter'),
-                ),
-              ],
-            ),
-          );
+        final chapters = snapshot.data ?? [];
+
+        if (chapters.isEmpty) {
+          return _buildEmptyState(context);
         }
 
         return ListView.builder(
           padding: const EdgeInsets.all(16.0),
-          itemCount: snapshot.data!.length,
+          itemCount: chapters.length,
           itemBuilder: (context, index) {
             return ChapterTile(
-              chapter: snapshot.data![index],
+              chapter: chapters[index],
               chapterService: _chapterService,
-              course: course,
-              lessonId: chapterId!,
+              course: widget.course,
+              lessonId: widget.chapterId!,
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('No chapters available'),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () => _showAddChapterForm(context),
+            icon: const Icon(Icons.add),
+            label: const Text('Add Chapter'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -180,7 +175,6 @@ class ChapterTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Chapter ${chapter.chapterId} has lesson_IDs: ${chapter.lessonId}");
     return Column(
       children: [
         ExpansionTile(
@@ -194,7 +188,6 @@ class ChapterTile extends StatelessWidget {
           ),
           children: [
             _buildLessonList(),
-            // Add Lesson and Quiz Buttons Row
             Padding(
               padding:
                   const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32.0),
@@ -225,10 +218,10 @@ class ChapterTile extends StatelessWidget {
   }
 
   Widget _buildLessonList() {
-    print(' lesson id :${chapter.lessonId.map(int.parse).toList()}');
     return StreamBuilder<List<Lesson>>(
-      stream: chapterService
-          .getLessonsForChapters(chapter.lessonId.map(int.parse).toList()),
+      stream: chapterService.getLessonsForChapters(
+        chapter.lessonId.map(int.parse).toList(),
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const ListTile(title: Text('Error loading lessons'));
@@ -270,11 +263,10 @@ class LessonTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Thông tin lesson_ID: ${lesson.questionid}');
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 32.0),
       title: Text(
-        "${lesson.lessonName}",
+        lesson.lessonName,
         style: const TextStyle(
           fontWeight: FontWeight.w400,
           fontSize: 15,
@@ -301,7 +293,6 @@ class LessonTile extends StatelessWidget {
               );
             },
           ),
-          // Wrapped Quiz button with StreamBuilder to show question count
           StreamBuilder<int>(
             stream: getQuestionCount(),
             builder: (context, snapshot) {
@@ -313,13 +304,13 @@ class LessonTile extends StatelessWidget {
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: Text('Quiz Options'),
+                          title: const Text('Quiz Options'),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               ListTile(
-                                leading: Icon(Icons.add_circle_outline),
-                                title: Text('Add Questions'),
+                                leading: const Icon(Icons.add_circle_outline),
+                                title: const Text('Add Questions'),
                                 onTap: () {
                                   Navigator.pop(context);
                                   Navigator.push(
@@ -333,10 +324,9 @@ class LessonTile extends StatelessWidget {
                                 },
                               ),
                               ListTile(
-                                leading: Icon(Icons.play_arrow),
-                                title: Text('Start Quiz'),
+                                leading: const Icon(Icons.play_arrow),
+                                title: const Text('Start Quiz'),
                                 onTap: () {
-                                  print('trỏ tới :${lesson.lesson_ID}');
                                   Navigator.pop(context);
                                   Navigator.push(
                                     context,
@@ -359,14 +349,14 @@ class LessonTile extends StatelessWidget {
                       right: 0,
                       top: 0,
                       child: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
                         child: Text(
                           '${snapshot.data}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,

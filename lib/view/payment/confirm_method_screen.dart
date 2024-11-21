@@ -15,7 +15,17 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   int type = 1;
   double price = 0.0;
   String subject = '';
+  List<String> registeredCourses = [];
   String username = '';
+  String creatorId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchRegisteredCourses();
+    });
+  }
 
   void handleRadio(Object? e) {
     setState(() {
@@ -23,27 +33,65 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     });
   }
 
+  Future<void> _fetchRegisteredCourses() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        final userDoc =
+            await _firestore.collection('Users').doc(user.uid).get();
+        if (mounted) {
+          setState(() {
+            registeredCourses =
+                List<String>.from(userDoc.data()?['registeredCourses'] ?? []);
+          });
+        }
+      } catch (e) {
+        print('Failed to fetch registered courses: $e');
+      }
+    }
+  }
+
+  Future<void> _registerCourse(String courseId) async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await _firestore.collection('Users').doc(user.uid).update({
+          'registeredCourses': FieldValue.arrayUnion([courseId]),
+        });
+        if (mounted) {
+          _fetchRegisteredCourses();
+        }
+      } catch (e) {
+        print('Failed to register course: $e');
+      }
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    price = args['price'];
-    subject = args['subject'];
-    username = args['username'];
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      setState(() {
+        price = args['price'];
+        subject = args['subject'];
+        username = args['username'];
+        creatorId = args['courseId'];
+      });
+    }
   }
 
   Future<void> sendEmail(String subject, String body) async {
-    final smtpServer = gmail('tranducvuht@gmail.com',
-        '0345934782'); // Thay thế bằng email và mật khẩu ứng dụng của bạn
-
-    final message = Message()
-      ..from = Address('tranducvuht@gmail.com', 'Payment System')
-      ..recipients.add('tranducvuht@gmail.com')
-      ..subject = subject
-      ..text = body;
-
     try {
+      // Note: Replace with your actual email configuration
+      final smtpServer = gmail('your-email@gmail.com', 'your-app-password');
+      final message = Message()
+        ..from = Address('your-email@gmail.com', 'Payment System')
+        ..recipients.add('recipient-email@gmail.com')
+        ..subject = subject
+        ..text = body;
+
       await send(message, smtpServer);
       print('Email sent successfully');
     } catch (e) {
@@ -51,13 +99,29 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     }
   }
 
+  Future<void> _updatePaymentStatus() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      try {
+        await _firestore.collection('Payments').add({
+          'userId': user.uid,
+          'courseId': subject,
+          'amount': price,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+        print("Payment status updated.");
+      } catch (e) {
+        print('Failed to update payment status: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Payment Method"),
-        leading: BackButton(),
+        title: const Text("Payment Method"),
+        leading: const BackButton(),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -65,11 +129,11 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.only(right: 20),
+          padding: const EdgeInsets.only(right: 20),
           child: Center(
             child: Column(
               children: [
-                Padding(
+                const Padding(
                   padding: EdgeInsets.only(top: 10, bottom: 20),
                   child: Text(
                     "Select Payment Method",
@@ -77,53 +141,56 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                   ),
                 ),
                 RadioListTile(
-                  title: Text("Credit Card"),
+                  title: const Text("Credit Card"),
                   value: 1,
                   groupValue: type,
                   onChanged: handleRadio,
                 ),
                 RadioListTile(
-                  title: Text("Bank Transfer"),
+                  title: const Text("Bank Transfer"),
                   value: 2,
                   groupValue: type,
                   onChanged: handleRadio,
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle payment logic here
-                    // Call your payment processing function
+                  onPressed: () async {
+                    try {
+                      await showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Payment Successful'),
+                            content:
+                                Text('You have paid \$$price for $subject'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  _updatePaymentStatus();
+                                  _registerCourse(creatorId);
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context)
+                                      .pushReplacementNamed('/courses');
+                                },
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
 
-                    // Simulate successful payment
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('Payment Successful'),
-                          content: Text('You have paid \$$price for $subject'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                // Update user's payment status in Firestore
-                                _updatePaymentStatus();
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-
-                    // Send email notification
-                    sendEmail("Payment Notification",
-                        "$username đã thanh toán \$$price cho khóa học: $subject");
+                      await sendEmail("Payment Notification",
+                          "$username đã thanh toán \$$price cho khóa học: $subject");
+                    } catch (e) {
+                      print('Error during payment process: $e');
+                      // Consider showing an error dialog to the user
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
-                    padding: EdgeInsets.symmetric(horizontal: 80),
+                    padding: const EdgeInsets.symmetric(horizontal: 80),
                   ),
-                  child: Text("Pay"),
+                  child: const Text("Pay"),
                 )
               ],
             ),
@@ -131,18 +198,5 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
         ),
       ),
     );
-  }
-
-  void _updatePaymentStatus() async {
-    User? user = _auth.currentUser; // Lấy người dùng hiện tại
-    if (user != null) {
-      try {
-        await _firestore.collection('Users').doc(user.uid).update({
-          'hasPaid': true,
-        });
-      } catch (e) {
-        print('Failed to update payment status: $e');
-      }
-    }
   }
 }

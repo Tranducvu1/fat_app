@@ -3,8 +3,8 @@ import 'package:fat_app/Model/chapter.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/Model/lesson.dart';
 import 'package:fat_app/service/chapter_service.dart';
-import 'package:fat_app/view/Student/quiz_page.dart';
-import 'package:fat_app/view/Teacher/teacher_screen.dart';
+import 'package:fat_app/view/Student/Chapter/question_page.dart';
+import 'package:fat_app/view/Teacher/Chatroom/teacher_screen.dart';
 import 'package:fat_app/view/live/live.dart';
 import 'package:flutter/material.dart';
 
@@ -288,14 +288,14 @@ class LessonTile extends StatelessWidget {
                       right: 0,
                       top: 0,
                       child: Container(
-                        padding: EdgeInsets.all(4),
-                        decoration: BoxDecoration(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
                         child: Text(
                           '${snapshot.data}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
                             fontWeight: FontWeight.bold,

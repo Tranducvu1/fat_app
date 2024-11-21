@@ -1,4 +1,4 @@
-import 'package:fat_app/view/Student/tutor_list_page.dart';
+import 'package:fat_app/view/Student/MainPage/tutor_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
