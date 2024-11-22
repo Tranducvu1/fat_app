@@ -40,10 +40,10 @@ class LectureListScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: ElevatedButton.icon(
             onPressed: () {
-              jumToLivePage(context, isHost: true);
+              jumToLivePage(context, isHost: false);
             },
             icon: const Icon(Icons.play_arrow),
-            label: const Text('Starting live'),
+            label: const Text('Join'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey[200],
               foregroundColor: Colors.black,

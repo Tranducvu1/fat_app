@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fat_app/service/user_service.dart';
-import 'package:fat_app/view/widgets/custom_bottom_navigation_bar.dart';
+import 'package:fat_app/view/widgets/navigation/custom_bottom_navigation_bar.dart';
+import 'package:fat_app/view/widgets/sub_course.dart/new_course.dart';
+import 'package:fat_app/view/widgets/sub_course.dart/popular_course.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -14,12 +16,47 @@ class InteractLearningPage extends StatefulWidget {
 class _InteractLearningPageState extends State<InteractLearningPage> {
   String username = '';
   int currentIndex = 0;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final searchController = TextEditingController();
-
+  Stream<List<DocumentSnapshot>>? popularCoursesStream;
+  Stream<List<DocumentSnapshot>>? newCoursesStream;
   @override
   void initState() {
     super.initState();
     _loadUserData();
+  }
+
+  void _initializeStreams() {
+    popularCoursesStream =
+        _firestore.collection('Courses').snapshots().map((snapshot) async {
+      var docs = snapshot.docs;
+
+      List<Future<int>> countFutures = docs.map((doc) async {
+        QuerySnapshot userSnapshot = await _firestore
+            .collection('Users')
+            .where('registeredCourses', arrayContains: doc.id)
+            .get();
+        return userSnapshot.docs.length;
+      }).toList();
+
+      List<int> counts = await Future.wait(countFutures);
+
+      List<MapEntry<DocumentSnapshot, int>> docsWithCounts = List.generate(
+        docs.length,
+        (index) => MapEntry(docs[index], counts[index]),
+      );
+
+      docsWithCounts.sort((a, b) => b.value.compareTo(a.value));
+
+      return docsWithCounts.take(2).map((e) => e.key).toList();
+    }).asyncMap((event) async => await event);
+
+    newCoursesStream = _firestore
+        .collection('Courses')
+        .orderBy('createdAt', descending: true)
+        .limit(2)
+        .snapshots()
+        .map((snapshot) => snapshot.docs);
   }
 
   Future<void> _loadUserData() async {
@@ -53,9 +90,11 @@ class _InteractLearningPageState extends State<InteractLearningPage> {
           const SizedBox(height: 24),
           _buildFeatureGrid(),
           const SizedBox(height: 24),
-          _buildScheduleCard(),
+          PopularCoursesWidget(popularCoursesStream: popularCoursesStream),
           const SizedBox(height: 24),
-          _buildGroupClasses(),
+          NewCoursesWidget(newCoursesStream: newCoursesStream),
+          const SizedBox(height: 24),
+          _buildScheduleCard(),
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),

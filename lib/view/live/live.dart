@@ -10,7 +10,6 @@ class LivePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var random = Random();
-    // Sinh số nguyên ngẫu nhiên trong khoảng từ 0 đến 100
     final userID = random.nextInt(100).toString();
     return SafeArea(
       child: ZegoUIKitPrebuiltLiveStreaming(

@@ -38,7 +38,7 @@ class CourseScreen extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               child: Table(
                 border: TableBorder.all(),
-                columnWidths: {
+                columnWidths: const {
                   0: FlexColumnWidth(0.5), // Column "Course ID"
                   1: FlexColumnWidth(2), // Column "Teacher"
                   2: FlexColumnWidth(2), // Column "Duration"
@@ -51,51 +51,51 @@ class CourseScreen extends StatelessWidget {
                   // Header row
                   TableRow(
                     decoration: BoxDecoration(color: Colors.grey[300]),
-                    children: [
+                    children: const [
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: Text(
                           'ID',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: Text(
                           'Course Name',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: Text(
                           'Teacher',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: Text(
                           'Price',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: Text(
                           'Status',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: Text(
                           'Edit',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(8.0),
                         child: Text(
                           'Delete',
                           style: TextStyle(fontWeight: FontWeight.bold),

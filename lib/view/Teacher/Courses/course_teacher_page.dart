@@ -1,13 +1,13 @@
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/view/Teacher/Courses/add_courses_screen.dart';
 import 'package:fat_app/view/Teacher/Chapter/list_lecture_page.dart';
-import 'package:fat_app/view/widgets/custom_teacher_app_bar.dart';
+import 'package:fat_app/view/widgets/navigation/custom_teacher_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fat_app/view/widgets/search_bar.dart';
 import 'package:fat_app/view/widgets/subject_chips.dart';
-import 'package:fat_app/view/widgets/custom_app_bar.dart';
+import 'package:fat_app/view/widgets/navigation/custom_app_bar.dart';
 
 class courseteacherPage extends StatefulWidget {
   const courseteacherPage({Key? key, required this.course}) : super(key: key);
@@ -45,7 +45,7 @@ class _CoursePage extends State<courseteacherPage> {
         // Get user document
         DocumentSnapshot userDoc =
             await _firestore.collection('Users').doc(user.uid).get();
-        print('Lấy thông tin khóa học từ người dùng : $userDoc');
+        print('get information  : $userDoc');
         if (userDoc.exists) {
           // Get username and email
           Map<String, dynamic> userData =
@@ -284,7 +284,7 @@ class _CoursePage extends State<courseteacherPage> {
     double price,
     String description,
     bool isCreator,
-    String courseId,
+    String create_Id,
     Course course,
   ) {
     return GestureDetector(
@@ -373,6 +373,36 @@ class _CoursePage extends State<courseteacherPage> {
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(height: 4),
+                    StreamBuilder<QuerySnapshot>(
+                      stream: _firestore
+                          .collection('Users')
+                          .where('registeredCourses', arrayContains: create_Id)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          int studentCount = snapshot.data!.docs.length;
+                          return Row(
+                            children: [
+                              const Icon(
+                                Icons.group,
+                                size: 16,
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$studentCount students enrolled',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        return const SizedBox();
+                      },
                     ),
                   ],
                 ),
@@ -476,7 +506,7 @@ class _CoursePage extends State<courseteacherPage> {
                                     // Delete course from Courses collection
                                     await _firestore
                                         .collection('Courses')
-                                        .doc(courseId)
+                                        .doc(create_Id)
                                         .delete();
 
                                     // Remove course ID from user's createdCourses
@@ -487,7 +517,7 @@ class _CoursePage extends State<courseteacherPage> {
                                           .doc(user.uid)
                                           .update({
                                         'createdCourses':
-                                            FieldValue.arrayRemove([courseId])
+                                            FieldValue.arrayRemove([create_Id])
                                       });
                                     }
 

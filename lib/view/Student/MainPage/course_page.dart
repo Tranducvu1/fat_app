@@ -6,8 +6,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fat_app/view/widgets/search_bar.dart';
 import 'package:fat_app/view/widgets/subject_chips.dart';
-import 'package:fat_app/view/widgets/custom_app_bar.dart';
-import 'package:fat_app/view/widgets/custom_bottom_navigation_bar.dart';
+import 'package:fat_app/view/widgets/navigation/custom_app_bar.dart';
+import 'package:fat_app/view/widgets/navigation/custom_bottom_navigation_bar.dart';
 
 class CoursePage extends StatefulWidget {
   const CoursePage({Key? key, required this.course}) : super(key: key);
@@ -25,7 +25,6 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
   List<String> registeredCourses = [];
 
   late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
@@ -33,12 +32,6 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
-    );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
     );
     _fetchCourses();
     _fetchRegisteredCourses();
@@ -261,6 +254,36 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 4),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('Users')
+                        .where('registeredCourses', arrayContains: creatorId)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        int studentCount = snapshot.data!.docs.length;
+                        return Row(
+                          children: [
+                            const Icon(
+                              Icons.group,
+                              size: 16,
+                              color: Colors.green,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$studentCount students enrolled',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      return const SizedBox();
+                    },
                   ),
                 ],
               ),

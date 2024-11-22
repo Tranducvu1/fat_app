@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fat_app/view/widgets/custom_app_bar.dart';
-import 'package:fat_app/view/widgets/custom_teacher_app_bar.dart';
+import 'package:fat_app/view/widgets/navigation/custom_app_bar.dart';
+import 'package:fat_app/view/widgets/navigation/custom_teacher_app_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fat_app/view/widgets/search_bar.dart';

@@ -200,140 +200,208 @@ class _TutorDetailPageState extends State<TutorDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.user.userName),
-        backgroundColor: Colors.green,
+        title: Text("${widget.user.userName}"),
+        backgroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {
-              // Implement share functionality
-            },
-          ),
-          IconButton(
-            icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
-            onPressed: () {
-              setState(() {
-                isFavorite = !isFavorite;
-              });
-            },
-          ),
-        ],
       ),
+      backgroundColor: Colors.white,
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Hero(
-                        tag: 'avatar-${widget.user.userName}',
-                        child: const CircleAvatar(
-                          radius: 40,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Profile Section
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const CircleAvatar(
+                          radius: 50,
                           backgroundImage: AssetImage('images/avata.jpg'),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Teacher: $teacherUsername',
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Subject: ${widget.course.subject}',
-                      style: const TextStyle(fontSize: 20, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Position: ${widget.user.position}',
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Description: ${widget.course.description}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    Text(
-                      'Phone: ${widget.user.phoneNumber}',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Time: ${widget.course.startDate} - ${widget.course.endDate}',
-                            style: const TextStyle(
-                                fontSize: 16, color: Colors.grey),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                          onPressed: startChat,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            'Inbox',
-                            style: TextStyle(fontSize: 16, color: Colors.white),
-                          )),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          '4.5/5',
-                          style: TextStyle(
-                            fontSize: 16,
+                        const SizedBox(height: 16),
+                        Text(
+                          teacherUsername,
+                          style: const TextStyle(
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Spacer(),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Implement review functionality
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "Science Teacher",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Rating
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ...List.generate(
+                                5,
+                                (index) => Icon(
+                                      index < 4 ? Icons.star : Icons.star_half,
+                                      color: Colors.amber,
+                                      size: 20,
+                                    )),
+                            const SizedBox(width: 8),
+                            const Text(
+                              "4.5/5",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Information Section
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        //subject
+                        InformationRow(
+                          icon: Icons.book_outlined,
+                          title: "Subject",
+                          content: widget.course.subject,
+                        ),
+                        // Location
+                        InformationRow(
+                          icon: Icons.location_on_outlined,
+                          title: "Location",
+                          content: widget.user.position,
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Available Time
+                        InformationRow(
+                          icon: Icons.calendar_today_outlined,
+                          title: "Available Time",
+                          content:
+                              "${widget.course.startDate} - ${widget.course.endDate}",
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Phone
+                        InformationRow(
+                          icon: Icons.phone_outlined,
+                          title: "Phone",
+                          content: widget.user.phoneNumber,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Buttons
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: startChat,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Inbox',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                          child: const Text(
-                            'Write a Review',
-                            style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              // Implement review functionality
+                            },
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              side: const BorderSide(color: Colors.black),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Write a Review',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
+    );
+  }
+}
+
+class InformationRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String content;
+
+  const InformationRow({
+    Key? key,
+    required this.icon,
+    required this.title,
+    required this.content,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 24, color: Colors.black54),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                content,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
