@@ -114,15 +114,20 @@ class ChapterService {
     }
   }
 
-  Future<void> updateChapter(String docId, Chapter chapter) =>
-      _firestore.collection('chapter').doc(docId).update(chapter.toMap());
-
-  Future<void> updateLesson(String docId, Lesson lesson) =>
-      _firestore.collection('lesson').doc(docId).update(lesson.toMap());
+  Future<void> updateChapter(Chapter chapter) async {
+    try {
+      await _firestore
+          .collection('chapters')
+          .doc(chapter.chapterId.toString())
+          .update({
+        'chapterName': chapter.chapterName,
+        'lessonId': chapter.lessonId,
+      });
+    } catch (e) {
+      throw Exception('Failed to update chapter: $e');
+    }
+  }
 
   Future<void> deleteChapter(String docId) =>
       _firestore.collection('chapter').doc(docId).delete();
-
-  Future<void> deleteLesson(String docId) =>
-      _firestore.collection('lesson').doc(docId).delete();
 }

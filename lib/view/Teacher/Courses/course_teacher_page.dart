@@ -1,6 +1,7 @@
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/view/Teacher/Courses/add_courses_screen.dart';
 import 'package:fat_app/view/Teacher/Chapter/list_lecture_page.dart';
+import 'package:fat_app/view/Teacher/Courses/update_course_screen.dart';
 import 'package:fat_app/view/widgets/navigation/custom_teacher_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -471,7 +472,13 @@ class _CoursePage extends State<courseteacherPage> {
                             IconButton(
                               icon: const Icon(Icons.edit, color: Colors.blue),
                               onPressed: () {
-                                // Implement edit functionality
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        UpdateCoursesScreen(course: course),
+                                  ),
+                                );
                               },
                               constraints: const BoxConstraints(),
                               padding: const EdgeInsets.all(8),
