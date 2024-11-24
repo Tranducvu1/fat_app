@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:fat_app/Model/districts_and_wards.dart';
 import 'package:flutter/material.dart';
 
+// Stateful widget for updating user information
 class UpdateInformationPage extends StatefulWidget {
   @override
   _UpdateInformationPageState createState() => _UpdateInformationPageState();
@@ -15,55 +16,63 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
   final TextEditingController _classNameController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  String? _selectedDistrict;
-  String role = '';
-  String? _selectedWard;
-  String username = '';
-  String? _currentProfileImageUrl;
-  File? _imageFile;
-  bool _isUploading = false;
-  final UserService _userService = UserService();
-  final ImagePicker _picker = ImagePicker();
+  String? _selectedDistrict; // Holds the selected district
+  String role = ''; // User's role
+  String? _selectedWard; // Holds the selected ward
+  String username = ''; // User's name
+  String? _currentProfileImageUrl; // URL of the current profile image
+  File? _imageFile; // Holds the image file selected by the user
+  bool _isUploading = false; // Flag to track image upload status
+  final UserService _userService = UserService(); // Service to handle user data
+  final ImagePicker _picker =
+      ImagePicker(); // Image picker for selecting photos
   final Map<String, List<String>> _districtsAndWards =
-      DistrictsAndWards.MapDN();
-  final _formKey = GlobalKey<FormState>();
+      DistrictsAndWards.MapDN(); // Districts and wards data
+  final _formKey = GlobalKey<FormState>(); // Form key for validation
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadUserData(); // Load user data when the page is initialized
   }
 
   @override
   void dispose() {
+    // Clean up the controllers when the widget is disposed
     _userNameController.dispose();
     _classNameController.dispose();
     _addressController.dispose();
     super.dispose();
   }
 
+  // Loads the current user data to populate the form fields
   Future<void> _loadUserData() async {
-    // ... (existing code)
+    // Code to load user data from a backend service or database
   }
 
+  // Opens image picker to allow the user to pick a profile image
   Future<void> _pickImage() async {
-    // ... (existing code)
+    // Code for image picking logic
   }
 
+  // Saves the selected image to local storage
   Future<String?> _saveImageLocally() async {
-    // ... (existing code)
+    // Code to save image locally
   }
 
+  // Uploads the selected image to a remote server
   Future<String?> _uploadImage() async {
-    // ... (existing code)
+    // Code for uploading image
   }
 
+  // Handles form submission to update the user's profile
   Future<void> _handleSubmit() async {
-    // ... (existing code)
+    // Code for submitting the form data
   }
 
   @override
   Widget build(BuildContext context) {
+    // Builds the UI for the page
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -89,13 +98,13 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildHeader(),
+                _buildHeader(), // Builds header section of the page
                 SizedBox(height: 32),
-                _buildProfileImage(),
+                _buildProfileImage(), // Builds the profile image section
                 SizedBox(height: 40),
-                _buildInputFields(),
+                _buildInputFields(), // Builds the input fields for user data
                 SizedBox(height: 40),
-                _buildSubmitButton(),
+                _buildSubmitButton(), // Builds the submit button for form submission
               ],
             ),
           ),
@@ -104,6 +113,7 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
     );
   }
 
+  // Builds the header section with title and subtitle
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -128,6 +138,7 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
     );
   }
 
+  // Builds the profile image display and edit option
   Widget _buildProfileImage() {
     return Center(
       child: Stack(
@@ -162,7 +173,7 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
             bottom: 0,
             right: 0,
             child: GestureDetector(
-              onTap: _pickImage,
+              onTap: _pickImage, // Calls the image picking function
               child: Container(
                 width: 44,
                 height: 44,
@@ -192,6 +203,7 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
     );
   }
 
+  // Determines the profile image content to display
   Widget _buildProfileImageContent() {
     if (_imageFile != null) {
       return Image.file(
@@ -218,6 +230,7 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
     }
   }
 
+  // Builds the input fields section with validation
   Widget _buildInputFields() {
     return Column(
       children: [
@@ -258,7 +271,7 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
           onChanged: (value) {
             setState(() {
               _selectedDistrict = value;
-              _selectedWard = null;
+              _selectedWard = null; // Reset ward when district is changed
             });
           },
         ),
@@ -286,54 +299,33 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
     );
   }
 
+  // Builds a generic input field with validation
   Widget _buildInputField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
     required String hint,
-    TextInputType? keyboardType,
+    TextInputType keyboardType = TextInputType.text,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: TextFormField(
-            controller: controller,
-            keyboardType: keyboardType,
-            decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: Colors.blue),
-              hintText: hint,
-              hintStyle: TextStyle(color: Colors.grey[400]),
-              border: InputBorder.none,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'This field is required';
-              }
-              return null;
-            },
-          ),
-        ),
-      ],
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(),
+      ),
+      keyboardType: keyboardType,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return '$label is required';
+        }
+        return null;
+      },
     );
   }
 
+  // Builds a dropdown field for selecting district or ward
   Widget _buildDropdownField({
     required String? value,
     required List<String> items,
@@ -341,90 +333,43 @@ class _UpdateInformationPageState extends State<UpdateInformationPage> {
     required IconData icon,
     required Function(String?) onChanged,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[300]!),
-          ),
-          child: DropdownButtonFormField<String>(
-            value: value,
-            items: items.map((String item) {
-              return DropdownMenuItem<String>(
-                value: item,
-                child: Text(item),
-              );
-            }).toList(),
-            onChanged: onChanged,
-            decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: Colors.blue),
-              border: InputBorder.none,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-            icon: Icon(Icons.arrow_drop_down, color: Colors.blue),
-            isExpanded: true,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please select an option';
-              }
-              return null;
-            },
-          ),
-        ),
-      ],
+    return DropdownButtonFormField<String>(
+      value: value,
+      items: items.map<DropdownMenuItem<String>>((String item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text(item),
+        );
+      }).toList(),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(),
+      ),
+      onChanged: onChanged,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please select a $label';
+        }
+        return null;
+      },
     );
   }
 
+  // Builds the submit button for updating user information
   Widget _buildSubmitButton() {
-    return Container(
-      height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: [Colors.blue.shade400, Colors.blue.shade700],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
+    return ElevatedButton(
+      onPressed: _isUploading
+          ? null
+          : _handleSubmit, // Prevent button click during upload
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        backgroundColor: Colors.blue,
       ),
-      child: ElevatedButton(
-        onPressed: _isUploading ? null : _handleSubmit,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: _isUploading
-            ? CircularProgressIndicator(color: Colors.white)
-            : Text(
-                'Update Profile',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-      ),
+      child: _isUploading
+          ? CircularProgressIndicator(
+              color: Colors.white) // Show loading indicator when uploading
+          : Text('Update Profile', style: TextStyle(fontSize: 18)),
     );
   }
 }

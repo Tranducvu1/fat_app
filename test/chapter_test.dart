@@ -27,7 +27,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: AddChapterForm(
-          courseId: courseId,
+          id: courseId,
           onChapterAdded: () {},
         ),
       ),
@@ -62,7 +62,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: AddChapterForm(
-          courseId: courseId,
+          id: courseId,
           onChapterAdded: () {},
         ),
       ),
@@ -89,7 +89,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: AddChapterForm(
-          courseId: courseId,
+          id: courseId,
           onChapterAdded: () {},
         ),
       ),

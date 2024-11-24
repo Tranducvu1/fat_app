@@ -1,7 +1,5 @@
 import 'package:fat_app/service/question_service.dart'; // Importing the QuestionService to handle question-related operations
-import 'package:firebase_auth/firebase_auth.dart'; // FirebaseAuth for user authentication and accessing current user
 import 'package:flutter/material.dart'; // Flutter package for UI components
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore package for interacting with Firestore database
 
 class AddQuestionPage extends StatefulWidget {
   final String

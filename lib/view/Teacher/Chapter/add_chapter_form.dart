@@ -6,12 +6,12 @@ import 'package:fat_app/service/chapter_service.dart';
 
 class AddChapterForm extends StatefulWidget {
   final Function() onChapterAdded;
-  final String courseId;
+  final String id;
 
   const AddChapterForm({
     Key? key,
     required this.onChapterAdded,
-    required this.courseId,
+    required this.id,
   }) : super(key: key);
 
   @override
@@ -33,7 +33,7 @@ class _AddChapterFormState extends State<AddChapterForm> {
     _chapterNameController = TextEditingController();
 
     print('Function onChapterAdded: ${widget.onChapterAdded}');
-    print('Course ID: ${widget.courseId}');
+    print('Course ID: ${widget.id}');
   }
 
   @override
@@ -61,8 +61,8 @@ class _AddChapterFormState extends State<AddChapterForm> {
         print('Chapter ID: $chapter');
 
         // Update the course's chapterIds array with the chapterId as a string
-        await _courseService.addChapterToCourse(widget.courseId, chapterId);
-        print('Course ID: ${widget.courseId}');
+        await _courseService.addChapterToCourse(widget.id, chapterId);
+        print('Course ID: ${widget.id}');
         print('Chapter ID: $chapterId');
         // Notify that a new chapter was added
         widget.onChapterAdded();

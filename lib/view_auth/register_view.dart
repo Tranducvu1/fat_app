@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:fat_app/service/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
@@ -11,44 +10,59 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
-  _RegisterState();
-
+  // State variables for showing progress, visibility toggles, and user information
   bool showProgress = false;
   bool visible = false;
   UserService userService = UserService();
 
+  // Form key to manage form state
   final _formkey = GlobalKey<FormState>();
+
+  // Firebase Authentication instance
   final _auth = FirebaseAuth.instance;
+
+  // Primary color used in UI elements
   Color primaryColor = Color(0xFF4CAF50);
+
+  // Text controllers for form fields
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmpassController = TextEditingController();
   final TextEditingController username = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+
+  // Booleans for password visibility toggle
   bool _isObscure = true;
   bool _isObscure2 = true;
+
+  // Dropdown options for user roles (Student, Teacher)
   var options = ['Student', 'Teacher'];
-  var _currentItemSelected = "Student";
-  var role = "Student";
+  var _currentItemSelected = "Student"; // Default role selected
+  var role = "Student"; // Default role value
 
   @override
   Widget build(BuildContext context) {
+    // Building the Register screen
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.white, // Set background color
       body: Center(
         child: SingleChildScrollView(
+          // Allow scrolling if content is longer
           padding: EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
-            key: _formkey,
+            key: _formkey, // Connect the form with the form key
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // App logo at the top
                 Image.asset(
                   'images/img_login.png',
                   height: 120,
                   fit: BoxFit.contain,
                 ),
                 SizedBox(height: 24),
+
+                // Welcome text
                 Text(
                   'WELCOME',
                   style: TextStyle(
@@ -59,18 +73,24 @@ class _RegisterState extends State<Register> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 8),
+
+                // Subheading
                 Text(
                   'Create your account to continue',
                   style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 24),
+
+                // Username input field
                 _buildTextField(
                   controller: username,
                   hintText: 'Username',
                   icon: Icons.account_circle,
                 ),
                 SizedBox(height: 16),
+
+                // Email input field
                 _buildTextField(
                   controller: emailController,
                   hintText: 'Email',
@@ -78,6 +98,8 @@ class _RegisterState extends State<Register> {
                   keyboardType: TextInputType.emailAddress,
                 ),
                 SizedBox(height: 16),
+
+                // Password input field
                 _buildPasswordField(
                   controller: passwordController,
                   hintText: 'Password',
@@ -89,6 +111,8 @@ class _RegisterState extends State<Register> {
                   },
                 ),
                 SizedBox(height: 16),
+
+                // Confirm password input field
                 _buildPasswordField(
                   controller: confirmpassController,
                   hintText: 'Confirm Password',
@@ -100,6 +124,8 @@ class _RegisterState extends State<Register> {
                   },
                 ),
                 SizedBox(height: 16),
+
+                // Dropdown for selecting user role (Student or Teacher)
                 DropdownButtonFormField<String>(
                   value: _currentItemSelected,
                   items: options.map((String option) {
@@ -124,9 +150,13 @@ class _RegisterState extends State<Register> {
                   ),
                 ),
                 SizedBox(height: 24),
+
+                // Register button
                 ElevatedButton(
                   onPressed: () {
+                    // Validate form before registration
                     if (_formkey.currentState!.validate()) {
+                      // Call the sign-up method from UserService
                       userService.signUp(
                         _formkey,
                         username.text,
@@ -151,6 +181,8 @@ class _RegisterState extends State<Register> {
                   ),
                 ),
                 SizedBox(height: 16),
+
+                // Navigate to login page if user already has an account
                 Center(
                   child: RichText(
                     text: TextSpan(
@@ -189,6 +221,7 @@ class _RegisterState extends State<Register> {
     );
   }
 
+  // Helper function to build text input fields
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -209,6 +242,7 @@ class _RegisterState extends State<Register> {
         ),
       ),
       validator: (value) {
+        // Check if the field is empty
         if (value == null || value.isEmpty) {
           return "$hintText cannot be empty";
         }
@@ -217,6 +251,7 @@ class _RegisterState extends State<Register> {
     );
   }
 
+  // Helper function to build password input fields with visibility toggle
   Widget _buildPasswordField({
     required TextEditingController controller,
     required String hintText,
@@ -244,6 +279,7 @@ class _RegisterState extends State<Register> {
         ),
       ),
       validator: (value) {
+        // Validate password field and ensure passwords match
         if (value == null || value.isEmpty) {
           return "$hintText cannot be empty";
         }

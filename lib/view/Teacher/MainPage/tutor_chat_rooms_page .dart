@@ -13,30 +13,15 @@ class _TutorChatRoomsPageState extends State<TutorChatRoomsPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
-  void initState() {
-    super.initState();
-    getChatRoomIds();
-  }
-
-  void getChatRoomIds() async {
-    final currentUserId = _auth.currentUser?.uid;
-    if (currentUserId != null) {
-      QuerySnapshot snapshot = await _firestore.collection('chatrooms').get();
-      for (DocumentSnapshot doc in snapshot.docs) {
-        String chatRoomId = doc.id;
-        print('Chat Room ID: $chatRoomId');
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     final String currentUserId = _auth.currentUser?.uid ?? '';
+
+    // If the user is not authenticated, show a fallback UI
     if (currentUserId.isEmpty) {
       return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.of(context).pushReplacementNamed('/teachercourse');
             },
@@ -50,28 +35,37 @@ class _TutorChatRoomsPageState extends State<TutorChatRoomsPage> {
       );
     }
 
+    // Main UI with chat room list
     return Scaffold(
       appBar: AppBar(
         title: const Text("Chat Rooms"),
         centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore.collection('chatrooms').snapshots(),
+        stream: _firestore
+            .collection('chatrooms')
+            .where('members',
+                arrayContains: currentUserId) // Only fetch relevant chatrooms
+            .snapshots(),
         builder: (context, snapshot) {
+          // Show a loading indicator while data is being fetched
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
+          // Handle errors
           if (snapshot.hasError) {
             return const Center(
               child: Text("Error loading chat rooms"),
             );
           }
 
+          // Show a message if no chat rooms are available
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("No chat rooms available"));
           }
 
+          // Extract chat room data
           var chatRooms = snapshot.data!.docs;
 
           return ListView.separated(
@@ -81,9 +75,11 @@ class _TutorChatRoomsPageState extends State<TutorChatRoomsPage> {
             itemBuilder: (context, index) {
               var chatRoom = chatRooms[index].data() as Map<String, dynamic>;
               String chatRoomId = chatRooms[index].id;
-              List<dynamic> members = chatRoom['members'];
-              String otherUserName =
-                  members.firstWhere((member) => member != currentUserId);
+              List<dynamic> members = chatRoom['members'] ?? [];
+              String otherUserName = members.firstWhere(
+                (member) => member != currentUserId,
+                orElse: () => 'Unknown User',
+              );
 
               return Card(
                 elevation: 4.0,
@@ -105,12 +101,29 @@ class _TutorChatRoomsPageState extends State<TutorChatRoomsPage> {
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      otherUserName,
-                      style: const TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.blue[100],
+                          child: Text(
+                            otherUserName.isNotEmpty
+                                ? otherUserName[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16.0),
+                        Text(
+                          otherUserName,
+                          style: const TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -5,7 +5,7 @@ import 'package:fat_app/Model/question.dart';
 
 class ChapterService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+//get all chapters
   Stream<List<Chapter>> getChapters() {
     return _firestore
         .collection('chapter')
@@ -16,6 +16,7 @@ class ChapterService {
             .toList());
   }
 
+  //get lessons
   Future<void> addLesson(Lesson lesson) async {
     try {
       // Add lesson document to Firestore
@@ -27,6 +28,7 @@ class ChapterService {
     }
   }
 
+  //get chapters for course by chapterId
   Stream<List<Chapter>> getChaptersForCourse(List<int> chapterIds) {
     print('Fetching chapters for course: $chapterIds');
     return _firestore
@@ -44,6 +46,7 @@ class ChapterService {
     });
   }
 
+  //get questions for lesson
   Stream<List<Question>> getQuestionorLesson(List<int> chapterIds) {
     print('Fetching chapters for course: $chapterIds');
     return _firestore
@@ -61,6 +64,7 @@ class ChapterService {
     });
   }
 
+  //get lessons for chapters
   Stream<List<Lesson>> getLessonsForChapters(List<int> lessonIds) {
     print('Fetching lessons for chapters: $lessonIds');
 
@@ -83,6 +87,7 @@ class ChapterService {
     });
   }
 
+  //add chapter
   Future<void> addChapter(Chapter chapter) =>
       _firestore.collection('chapter').add(chapter.toMap());
 

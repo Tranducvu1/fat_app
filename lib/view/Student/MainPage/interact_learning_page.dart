@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fat_app/service/user_service.dart';
+import 'package:fat_app/view/Student/MainPage/aiScreen.dart';
 import 'package:fat_app/view/widgets/navigation/custom_bottom_navigation_bar.dart';
 import 'package:fat_app/view/widgets/sub_course.dart/new_course.dart';
 import 'package:fat_app/view/widgets/sub_course.dart/popular_course.dart';
@@ -15,15 +16,17 @@ class InteractLearningPage extends StatefulWidget {
 
 class _InteractLearningPageState extends State<InteractLearningPage> {
   String username = '';
-  int currentIndex = 0;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final searchController = TextEditingController();
+  int currentIndex = 0;
   Stream<List<DocumentSnapshot>>? popularCoursesStream;
   Stream<List<DocumentSnapshot>>? newCoursesStream;
+  final searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _initializeStreams();
   }
 
   void _initializeStreams() {
@@ -97,6 +100,17 @@ class _InteractLearningPageState extends State<InteractLearningPage> {
           _buildScheduleCard(),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const ChatScreen(),
+            ),
+          );
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.chat),
+      ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
@@ -123,7 +137,7 @@ class _InteractLearningPageState extends State<InteractLearningPage> {
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               Text(
-                username.isNotEmpty ? username : 'Student',
+                username.isNotEmpty ? username : 'Teacher',
                 style: const TextStyle(fontSize: 16),
               ),
             ],
@@ -167,9 +181,9 @@ class _InteractLearningPageState extends State<InteractLearningPage> {
               value: 1,
               child: Row(
                 children: [
-                  Icon(Icons.logout, color: Colors.black), // Icon Đăng xuất
+                  Icon(Icons.logout, color: Colors.black), // Icon log out
                   SizedBox(width: 8),
-                  Text("Log out"),
+                  Text("Log out"), // button log out
                 ],
               ),
             ),
@@ -372,43 +386,6 @@ class _InteractLearningPageState extends State<InteractLearningPage> {
     );
   }
 
-  Widget _buildGroupClasses() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Group Classes',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildClassCard(
-                'Science and Technology',
-                'Class Standard 8',
-                'Studying',
-                Colors.purple,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildClassCard(
-                'Math class 8',
-                '(1vs1)',
-                'Focusing',
-                Colors.blue,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildClassCard(
     String title,
     String subtitle,
@@ -460,6 +437,28 @@ class _InteractLearningPageState extends State<InteractLearningPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    try {
+      await UserService().logout(context);
+      Navigator.pop(context);
+    } catch (e) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Logout failed: $e")),
+      );
+    }
   }
 
   Widget _buildBottomNavigationBar() {

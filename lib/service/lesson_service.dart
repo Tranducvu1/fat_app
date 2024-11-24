@@ -1,55 +1,38 @@
-// lib/service/lesson_service.dart
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fat_app/Model/lesson.dart';
 
-class LessonService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+import '../constants/basefires_constant.dart';
+
+class LessonService extends BaseFirestoreService {
+  static const String _collection = 'lesson';
+
+  LessonService({super.firestore});
 
   Future<Lesson> getLessonByLessonId(int lessonId) async {
-    try {
-      // Truy vấn Firestore để tìm tài liệu có trường `lesson_ID` bằng `lessonId`
-      final QuerySnapshot querySnapshot = await _firestore
-          .collection('lesson')
+    return handleError(() async {
+      final QuerySnapshot querySnapshot = await firestore
+          .collection(_collection)
           .where('lesson_ID', isEqualTo: lessonId)
+          .limit(1) // Optimization: limit to 1 since we only need one
           .get();
 
-      // Kiểm tra xem có kết quả nào được trả về hay không
-      if (querySnapshot.docs.isNotEmpty) {
-        // Lấy tài liệu đầu tiên từ kết quả truy vấn
-        final DocumentSnapshot doc = querySnapshot.docs.first;
-        print('Lesson ID: ${doc['lesson_ID']}');
-        print('Document ID: ${doc.id}');
-
-        // Trả về đối tượng `Lesson`
-        return Lesson.fromMap(doc.data() as Map<String, dynamic>);
-      } else {
-        throw Exception('Lesson not found');
+      if (querySnapshot.docs.isEmpty) {
+        throw Exception('Lesson not found with ID: $lessonId');
       }
-    } catch (e) {
-      throw Exception('Failed to load lesson: $e');
-    }
+
+      final doc = querySnapshot.docs.first;
+      print('Found lesson - ID: ${doc['lesson_ID']}, Doc ID: ${doc.id}');
+
+      return Lesson.fromMap(doc.data() as Map<String, dynamic>);
+    }, 'get lesson');
   }
 
-  //Update an existing lesson
   Future<void> updateLesson(Lesson lesson) async {
-    try {
-      await _firestore
-          .collection('lesson')
+    return handleError(() async {
+      await firestore
+          .collection(_collection)
           .doc(lesson.lesson_ID.toString())
           .update(lesson.toMap());
-    } catch (e) {
-      throw Exception('Failed to update lesson: $e');
-    }
-  }
-
-//
-  // Delete a lesson
-  Future<void> deleteLesson(int lessonId) async {
-    try {
-      await _firestore.collection('lesson').doc(lessonId.toString()).delete();
-    } catch (e) {
-      throw Exception('Failed to delete lesson: $e');
-    }
+    }, 'update lesson');
   }
 }

@@ -1,14 +1,18 @@
 import 'package:fat_app/auth/auth_state_handler.dart';
-import 'package:fat_app/constants/routes.dart';
+import 'package:fat_app/constants/constant_routes.dart';
 import 'package:fat_app/view/introduction_screen.dart';
 import 'package:fat_app/view_auth/login_view.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// Main function to initialize Firebase and run the app
 Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   if (kIsWeb) {
+    // Initialize Firebase for web applications with specific options
     await Firebase.initializeApp(
         options: const FirebaseOptions(
             apiKey: "AIzaSyCiwggXPtUAGNoyweoUyrfYRgv2fx2GrGw",
@@ -19,13 +23,12 @@ Future<void> main() async {
             appId: "1:988979923331:web:01192e3ea977b9cdf0ceb6",
             measurementId: "G-7748LM21HT"));
   } else {
+    // Initialize Firebase for other platforms (like Android, iOS)
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp();
   }
 
-  // cameras = await availableCameras();
-  //WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+  // Start the app by calling the AuthStateHandler widget
   runApp(MaterialApp(
     theme: ThemeData(
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
@@ -36,11 +39,13 @@ Future<void> main() async {
   ));
 }
 
+// The HomePage widget is the main screen displayed after the app is initialized.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get the size of the screen
     final screenSize = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAF9),
@@ -63,7 +68,7 @@ class HomePage extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // Circular decorations
+                    // Circular decorations for visual effect
                     Positioned(
                       right: -50,
                       top: -50,
@@ -76,13 +81,14 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Logo and Title
+                    // Logo and Title Section
                     Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Hero(
-                            tag: 'app_logo',
+                            tag:
+                                'app_logo', // Hero animation for logo transition
                             child: Image.asset(
                               'images/factutor_logo.png',
                               width: screenSize.width * 0.4,
@@ -96,7 +102,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
 
-              // Features Section
+              // Features Section with feature list
               Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
@@ -110,12 +116,13 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    // Display the list of features
                     ..._buildFeatureItems(),
                   ],
                 ),
               ),
 
-              // Call to Action Button
+              // Call to Action Button and Login Redirection
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24.0,
@@ -125,6 +132,7 @@ class HomePage extends StatelessWidget {
                   children: [
                     ElevatedButton(
                       onPressed: () {
+                        // Navigate to the Onboarding screen
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => OnboardingScreen(),
@@ -161,10 +169,11 @@ class HomePage extends StatelessWidget {
                     const SizedBox(height: 16),
                     TextButton(
                         onPressed: () {
-                          // Add navigation to login page
+                          // Placeholder for navigation to login page
                         },
                         child: GestureDetector(
                           onTap: () {
+                            // Navigate to the Login screen when tapped
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => LoginPage(),
@@ -189,6 +198,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
+  // Function to generate feature items for the "Why Choose Us?" section
   List<Widget> _buildFeatureItems() {
     final features = [
       {
@@ -213,6 +223,7 @@ class HomePage extends StatelessWidget {
       },
     ];
 
+    // Create a list of widgets for each feature
     return features.map((feature) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 16.0),

@@ -75,11 +75,12 @@ class _LectureListTeacherScreenState extends State<LectureListTeacherScreen> {
   }
 
   void _showAddChapterForm(BuildContext context) {
+    print('Course ID haha: ${widget.course.id}');
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => AddChapterForm(
           onChapterAdded: _handleNewChapter,
-          courseId: widget.course.creatorId,
+          id: widget.course.id,
         ),
       ),
     );

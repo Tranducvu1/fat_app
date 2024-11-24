@@ -19,6 +19,7 @@ class CoursePage extends StatefulWidget {
 
 class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
   String username = '';
+  String creatorEmail = '';
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Course> courses = [];
@@ -64,8 +65,46 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
         courses =
             result.docs.map((doc) => Course.fromDocumentSnapshot(doc)).toList();
       });
+
+      // Fetch creator email for each course
+      for (var course in courses) {
+        creatorEmail = await _getCreatorEmail(
+            course.id); // Pass course.id to get creator's email
+        print('Creator email for course ${course.subject}: $creatorEmail');
+      }
     } catch (e) {
       print('Failed to fetch courses: $e');
+    }
+  }
+
+  Future<String> _getCreatorEmail(String courseId) async {
+    try {
+      // Fetch all users
+      final usersSnapshot =
+          await FirebaseFirestore.instance.collection('Users').get();
+
+      // Loop through each user and check if the user has the role 'Teacher' and if the user created the course
+      for (var userDoc in usersSnapshot.docs) {
+        // Check if the user is a Teacher and has the createdCourses field
+        if (userDoc.data().containsKey('rool') &&
+            userDoc.get('rool') == 'Teacher' &&
+            userDoc.data().containsKey('createdCourses')) {
+          // Get the list of created courses
+          List<dynamic> createdCourses = userDoc.get('createdCourses') ?? [];
+
+          // Check if the course ID is in the list of created courses
+          if (createdCourses.contains(courseId)) {
+            // Return the email of the teacher
+            final email = userDoc.get('email') as String? ?? '';
+            return email;
+          }
+        }
+      }
+
+      return 'No email found'; // If no creator is found
+    } catch (e) {
+      print('Error getting creator email: $e');
+      return 'Error retrieving email';
     }
   }
 
@@ -133,25 +172,29 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
             ),
           ),
           Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
+            child: ListView.builder(
               padding: const EdgeInsets.all(16.0),
-              crossAxisSpacing: 16.0,
-              mainAxisSpacing: 16.0,
-              childAspectRatio: 0.7,
-              children: courses.map((course) {
+              itemCount: courses.length,
+              itemBuilder: (context, index) {
+                final course = courses[index];
                 bool isRegistered = registeredCourses.contains(course.id);
-                return _buildClassCard(
-                  course.subject,
-                  course.teacher,
-                  '${course.startDate} - ${course.endDate}',
-                  course.price,
-                  course.description,
-                  isRegistered,
-                  course.id as String,
-                  course, // Passing the course to the method
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: SizedBox(
+                    height: 320,
+                    child: _buildClassCard(
+                      course.subject,
+                      course.teacher,
+                      '${course.startDate} - ${course.endDate}',
+                      course.price,
+                      course.description,
+                      isRegistered,
+                      course.id as String,
+                      course,
+                    ),
+                  ),
                 );
-              }).toList(),
+              },
             ),
           ),
         ],
@@ -193,6 +236,7 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
   ) {
     return Card(
       elevation: 4,
+      margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
       ),
@@ -226,36 +270,32 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
                   Text(
                     subject,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 20, // Tăng kích thước chữ
                       fontWeight: FontWeight.bold,
                       color: Colors.green,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Row(
                     children: [
                       const Icon(
                         Icons.person,
-                        size: 16,
+                        size: 18, // Tăng kích thước icon
                         color: Colors.green,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           teacher,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 16, // Tăng kích thước chữ
                             color: Colors.grey.shade700,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   StreamBuilder<QuerySnapshot>(
                     stream: FirebaseFirestore.instance
                         .collection('Users')
@@ -268,14 +308,14 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
                           children: [
                             const Icon(
                               Icons.group,
-                              size: 16,
+                              size: 18, // Tăng kích thước icon
                               color: Colors.green,
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 8),
                             Text(
                               '$studentCount students enrolled',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 16, // Tăng kích thước chữ
                                 color: Colors.grey.shade700,
                               ),
                             ),
@@ -290,7 +330,7 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -298,42 +338,39 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
                       children: [
                         const Icon(
                           Icons.calendar_today,
-                          size: 16,
+                          size: 18, // Tăng kích thước icon
                           color: Colors.green,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             time,
                             style: const TextStyle(
-                              fontSize: 13,
+                              fontSize: 16, // Tăng kích thước chữ
                               color: Colors.black87,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Expanded(
                       child: Text(
                         description,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 15, // Tăng kích thước chữ
                           color: Colors.grey.shade600,
                         ),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
                       child: isRegistered
                           ? ElevatedButton.icon(
                               onPressed: () {
-                                print('course.chapterId: ${course.chapterId}');
                                 if (course.chapterId.isNotEmpty) {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -355,8 +392,8 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16), // Tăng padding
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -378,7 +415,7 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
                                 backgroundColor: Colors.blue,
                                 foregroundColor: Colors.white,
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 12),
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -400,39 +437,51 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
     double price,
     String creatorId,
     String subject,
-  ) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirm Purchase'),
-          content: Text('Bạn xác nhận mua khóa học với giá \$$price?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Không'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Có'),
-              onPressed: () {
-                Navigator.of(context).pop();
+  ) async {
+    try {
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Confirm Purchase'),
+            content: Text(
+                'You confirm the purchase of the course at the price \$$price?'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Không'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Có'),
+                onPressed: () async {
+                  try {
+                    Navigator.of(dialogContext).pop();
 
-                Navigator.of(context).pushNamed(
-                  '/payment',
-                  arguments: {
-                    'price': price,
-                    'courseId': creatorId,
-                    'subject': subject,
-                    'username': username,
-                  },
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
+                    if (context.mounted) {
+                      Navigator.of(context).pushNamed(
+                        '/payment',
+                        arguments: {
+                          'email': creatorEmail,
+                          'price': price,
+                          'courseId': creatorId,
+                          'subject': subject,
+                          'username': username,
+                        },
+                      );
+                    }
+                  } catch (e) {
+                    print('Error in confirmation dialog: $e');
+                  }
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      print('Error showing confirmation dialog: $e');
+    }
   }
 }

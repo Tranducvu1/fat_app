@@ -11,7 +11,7 @@ class IntroPage2 extends StatelessWidget {
       child: Column(
         // mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 80,
           ),
           Container(
@@ -21,16 +21,16 @@ class IntroPage2 extends StatelessWidget {
             child: Lottie.network(
                 'https://lottie.host/f256f1de-2aa1-4b36-aee4-163792eb0633/ENLbIUY25Z.json'),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
-          Text(
+          const Text(
             "Learn Anytime, Anywhere",
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 15),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+          const SizedBox(height: 15),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30.0),
             child: Text(
               "Learn online easily with diverse courses, suitable for your needs.",
               textAlign: TextAlign.center,

@@ -3,7 +3,6 @@ import 'package:fat_app/Model/chapter.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/Model/lesson.dart';
 import 'package:fat_app/service/chapter_service.dart';
-import 'package:fat_app/view/Student/Chapter/question_page.dart';
 import 'package:fat_app/view/Teacher/Chatroom/teacher_screen.dart';
 import 'package:fat_app/view/live/live.dart';
 import 'package:flutter/material.dart';
@@ -89,17 +88,11 @@ class LectureListScreen extends StatelessWidget {
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
+          return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('No chapters available'),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Chapter'),
-                ),
+                Text('No chapters available'),
               ],
             ),
           );
@@ -218,7 +211,7 @@ class LessonTile extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 32.0),
       title: Text(
-        "${lesson.lessonName}",
+        lesson.lessonName,
         style: const TextStyle(
           fontWeight: FontWeight.w400,
           fontSize: 15,
@@ -267,13 +260,17 @@ class LessonTile extends StatelessWidget {
                                 onTap: () {
                                   print('trỏ tới :${lesson.lesson_ID}');
                                   Navigator.pop(context);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => QuestionPage(
-                                        lessonId: lesson.questionid,
-                                      ),
-                                    ),
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) => QuestionPage(
+                                  //       lessonId: lesson.questionid,
+                                  //     ),
+                                  //   ),
+                                  // );
+                                  Navigator.of(context).pushReplacementNamed(
+                                    '/question',
+                                    arguments: lesson.questionid,
                                   );
                                 },
                               ),

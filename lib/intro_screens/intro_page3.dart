@@ -11,24 +11,24 @@ class IntroPage3 extends StatelessWidget {
       child: Column(
         // mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 80,
           ),
           Container(
             height: 300,
             width: 400,
-            margin: EdgeInsets.only(left: 20, right: 20),
+            margin: const EdgeInsets.only(left: 20, right: 20),
             child: Lottie.network(
                 'https://lottie.host/af563ef5-b41f-41e7-b75a-9a8435d81d1e/MlTrZzPVnC.json'),
           ),
-          SizedBox(height: 20),
-          Text(
+          const SizedBox(height: 20),
+          const Text(
             "Track Progress",
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 15),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+          const SizedBox(height: 15),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 30.0),
             child: Text(
               "Track your learning progress and receive feedback from your tutor to improve your learning outcomes.",
               textAlign: TextAlign.center,

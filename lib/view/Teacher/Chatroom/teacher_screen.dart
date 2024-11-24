@@ -3,10 +3,9 @@ import 'package:fat_app/service/lesson_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
-import 'dart:ui' as ui;
 
 class TeacherScreen extends StatefulWidget {
-  final int lessonId;
+  final int lessonId; // The ID of the lesson to be fetched
 
   const TeacherScreen({
     Key? key,
@@ -19,15 +18,26 @@ class TeacherScreen extends StatefulWidget {
 
 class _TeacherScreenState extends State<TeacherScreen> {
   final TextEditingController _messageController = TextEditingController();
-  late YoutubePlayerController _controller;
+  late YoutubePlayerController _youtubeController;
   final LessonService _lessonService = LessonService();
-  Lesson? lesson;
-  double _volume = 100;
+  Lesson? lesson; // Holds the fetched lesson data
+  double _volume = 100; // Volume control for the video player
 
   @override
   void initState() {
     super.initState();
-    _controller = YoutubePlayerController(
+    _initializeYoutubeController();
+    _fetchLessonData();
+
+    // Force landscape orientation for this screen
+    SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight],
+    );
+  }
+
+  /// Initializes the YouTube player controller
+  void _initializeYoutubeController() {
+    _youtubeController = YoutubePlayerController(
       params: const YoutubePlayerParams(
         showControls: true,
         mute: false,
@@ -35,12 +45,9 @@ class _TeacherScreenState extends State<TeacherScreen> {
         loop: false,
       ),
     );
-    _fetchLessonData();
-
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
   }
 
+  /// Fetches lesson data from the service and updates the state
   Future<void> _fetchLessonData() async {
     try {
       final fetchedLesson =
@@ -49,45 +56,38 @@ class _TeacherScreenState extends State<TeacherScreen> {
       setState(() {
         lesson = fetchedLesson;
       });
+
       if (lesson != null && lesson!.video.isNotEmpty) {
-        print('Lesson video: ${lesson!.video}');
         _loadVideo();
       } else {
-        print('Lesson video is empty or lesson is null');
+        debugPrint('Lesson video is empty or lesson is null');
       }
     } catch (e) {
-      print('Error fetching lesson: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error loading lesson: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      debugPrint('Error fetching lesson: $e');
+      _showErrorSnackbar('Error loading lesson: $e');
     }
   }
 
+  /// Loads the video into the YouTube player
   void _loadVideo() {
     if (lesson != null && lesson!.video.isNotEmpty) {
-      String videoId = lesson!.video;
-      print('VideoId before loading: $videoId');
-
-      _controller.loadVideoById(
-        videoId: videoId,
-      );
+      _youtubeController.loadVideoById(videoId: lesson!.video);
     } else {
-      print("No valid video ID to load.");
+      debugPrint("No valid video ID to load.");
     }
   }
 
-  @override
-  void dispose() {
-    _messageController.dispose();
-    _controller.close();
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-    super.dispose();
+  /// Shows a snackbar with the specified error message
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
+  /// Displays the settings modal for volume control
   void _showSettings() {
     showModalBottomSheet(
       context: context,
@@ -97,7 +97,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'Cài đặt âm lượng',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
@@ -108,7 +108,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
                 onChanged: (newVolume) {
                   setState(() {
                     _volume = newVolume;
-                    _controller.setVolume(newVolume.round());
+                    _youtubeController.setVolume(newVolume.round());
                   });
                 },
               ),
@@ -121,36 +121,49 @@ class _TeacherScreenState extends State<TeacherScreen> {
   }
 
   @override
+  void dispose() {
+    _messageController.dispose();
+    _youtubeController.close();
+
+    // Reset orientation to portrait mode when exiting the screen
+    SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
+    );
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return YoutubePlayerScaffold(
-      controller: _controller,
+      controller: _youtubeController,
       builder: (context, player) {
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Colors.white,
             elevation: 1.0,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.black),
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
                 Navigator.of(context).pushNamed('/listlecture');
               },
             ),
             title: Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: Text(
                     "Mrs Thanh",
                     style: TextStyle(color: Colors.black),
                   ),
                 ),
-                Icon(Icons.people, color: Colors.black),
-                SizedBox(width: 5),
-                Text(
+                const Icon(Icons.people, color: Colors.black),
+                const SizedBox(width: 5),
+                const Text(
                   "30",
                   style: TextStyle(color: Colors.black),
                 ),
                 IconButton(
-                  icon: Icon(Icons.settings, color: Colors.black),
+                  icon: const Icon(Icons.settings, color: Colors.black),
                   onPressed: _showSettings,
                 ),
               ],
@@ -158,44 +171,53 @@ class _TeacherScreenState extends State<TeacherScreen> {
           ),
           body: Column(
             children: [
+              // Video player area
               Expanded(
                 child: Container(
                   width: double.infinity,
                   child: player,
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _messageController,
-                        decoration: InputDecoration(
-                          hintText: "Nhập tin nhắn...",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 15.0, vertical: 10.0),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 5),
-                    IconButton(
-                      icon: Icon(Icons.send),
-                      onPressed: () {
-                        print("Tin nhắn: ${_messageController.text}");
-                        _messageController.clear();
-                      },
-                    ),
-                  ],
-                ),
-              ),
+              // Message input area
+              _buildMessageInput(),
             ],
           ),
         );
       },
+    );
+  }
+
+  /// Builds the message input area below the video
+  Widget _buildMessageInput() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              decoration: InputDecoration(
+                hintText: "Nhập tin nhắn...",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 15.0,
+                  vertical: 10.0,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 5),
+          IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: () {
+              debugPrint("Tin nhắn: ${_messageController.text}");
+              _messageController.clear();
+            },
+          ),
+        ],
+      ),
     );
   }
 }

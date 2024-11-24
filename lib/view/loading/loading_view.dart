@@ -31,23 +31,15 @@ class _LoadingViewState extends State<LoadingView> {
     }
 
     if (widget.role == 'Student') {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => InteractLearningPage(),
-        ),
-      );
+      Navigator.of(context).pushReplacementNamed('/interactlearning');
     } else if (widget.role == 'Admin') {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => MainScreen(),
+          builder: (context) => const MainScreen(),
         ),
       );
     } else if (widget.role == 'Teacher') {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => InteractLearningTeacherPage(),
-        ),
-      );
+      Navigator.of(context).pushReplacementNamed('/teacherinteractlearning');
     } else {
       Navigator.of(context).pushReplacementNamed('/login');
     }
@@ -55,7 +47,7 @@ class _LoadingViewState extends State<LoadingView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -4,29 +4,43 @@ import 'package:fat_app/Model/courses.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AddCoursesScreen extends StatefulWidget {
-  const AddCoursesScreen({Key? key}) : super(key: key);
+class UpdateCoursesScreen extends StatefulWidget {
+  final Course course;
+
+  const UpdateCoursesScreen({Key? key, required this.course}) : super(key: key);
 
   @override
-  _AddCoursesScreenState createState() => _AddCoursesScreenState();
+  _UpdateCoursesScreenState createState() => _UpdateCoursesScreenState();
 }
 
-class _AddCoursesScreenState extends State<AddCoursesScreen> {
-  final _formKey = GlobalKey<FormState>(); // Key to validate the form
+class _UpdateCoursesScreenState extends State<UpdateCoursesScreen> {
+  final _formKey = GlobalKey<FormState>();
 
-  // Controllers for the input fields
-  final TextEditingController _teacherController = TextEditingController();
-  final TextEditingController _startDateController = TextEditingController();
-  final TextEditingController _endDateController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _subjectController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  late TextEditingController _teacherController;
+  late TextEditingController _startDateController;
+  late TextEditingController _endDateController;
+  late TextEditingController _priceController;
+  late TextEditingController _subjectController;
+  late TextEditingController _descriptionController;
 
   final CourseService _courseService = CourseService();
 
   @override
+  void initState() {
+    super.initState();
+    // Khởi tạo controller với dữ liệu hiện tại của khóa học
+    _teacherController = TextEditingController(text: widget.course.teacher);
+    _startDateController = TextEditingController(text: widget.course.startDate);
+    _endDateController = TextEditingController(text: widget.course.endDate);
+    _priceController =
+        TextEditingController(text: widget.course.price.toString());
+    _subjectController = TextEditingController(text: widget.course.subject);
+    _descriptionController =
+        TextEditingController(text: widget.course.description);
+  }
+
+  @override
   void dispose() {
-    // Dispose controllers to free up resources
     _teacherController.dispose();
     _startDateController.dispose();
     _endDateController.dispose();
@@ -36,7 +50,6 @@ class _AddCoursesScreenState extends State<AddCoursesScreen> {
     super.dispose();
   }
 
-  /// Opens a date picker dialog and sets the selected date to the specified controller
   Future<void> _selectDate(TextEditingController controller) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -45,51 +58,47 @@ class _AddCoursesScreenState extends State<AddCoursesScreen> {
       lastDate: DateTime(2101),
     );
     if (pickedDate != null) {
-      controller.text = '${pickedDate.toLocal()}'.split(' ')[0]; // Format date
+      controller.text = '${pickedDate.toLocal()}'.split(' ')[0];
     }
   }
 
-  /// Saves the course data to Firestore
-  Future<void> _saveCourse() async {
+  Future<void> _updateCourse() async {
     if (_formKey.currentState!.validate()) {
-      User? user = FirebaseAuth.instance.currentUser; // Get the logged-in user
-      if (user != null) {
-        Course course = Course(
-          id: '',
+      try {
+        // Cập nhật thông tin khóa học
+        Course updatedCourse = Course(
+          id: widget.course.id, // Sử dụng ID của khóa học hiện tại
           teacher: _teacherController.text,
           startDate: _startDateController.text,
           endDate: _endDateController.text,
           price: double.parse(_priceController.text),
           subject: _subjectController.text,
           description: _descriptionController.text,
-          creatorId: user.uid,
-          createdAt: Timestamp.now(),
-          chapterId: [],
+          creatorId: widget.course.creatorId,
+          createdAt: widget.course.createdAt,
+          chapterId: widget.course.chapterId,
         );
 
-        try {
-          await _courseService.saveCourse(course); // Save the course
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Course added successfully!')),
-          );
-          Navigator.of(context).pop(true); // Navigate back on success
-        } catch (e) {
-          debugPrint('Error saving course: $e');
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to add course')),
-          );
-          Navigator.of(context).pop(false); // Navigate back on failure
-        }
+        await _courseService.updateCourse(updatedCourse);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Course updated successfully!')),
+        );
+        Navigator.of(context).pop(true);
+      } catch (e) {
+        debugPrint('Error updating course: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update course')),
+        );
       }
     }
   }
 
-  /// Builds the UI for the screen
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Course'),
+        title: const Text('Update Course'),
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
         centerTitle: true,
@@ -137,7 +146,25 @@ class _AddCoursesScreenState extends State<AddCoursesScreen> {
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
-              _buildActionButtons(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade300,
+                    ),
+                    child: const Text('Cancel',
+                        style: TextStyle(color: Colors.black)),
+                  ),
+                  ElevatedButton(
+                    onPressed: _updateCourse, // Gọi hàm cập nhật
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    child: const Text('Update'),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -145,7 +172,6 @@ class _AddCoursesScreenState extends State<AddCoursesScreen> {
     );
   }
 
-  /// Creates a reusable text field widget
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -171,27 +197,6 @@ class _AddCoursesScreenState extends State<AddCoursesScreen> {
         validator: (value) =>
             value == null || value.isEmpty ? 'Please enter $label' : null,
       ),
-    );
-  }
-
-  /// Builds the Cancel and Submit buttons
-  Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        ElevatedButton(
-          onPressed: () => Navigator.of(context).pop(),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.grey.shade300,
-          ),
-          child: const Text('Cancel', style: TextStyle(color: Colors.black)),
-        ),
-        ElevatedButton(
-          onPressed: _saveCourse,
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-          child: const Text('Submit'),
-        ),
-      ],
     );
   }
 }

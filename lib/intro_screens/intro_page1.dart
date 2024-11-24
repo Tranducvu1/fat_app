@@ -11,10 +11,10 @@ class IntroPage1 extends StatelessWidget {
       child: Column(
         // mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 80,
           ),
-          Center(
+          const Center(
             child: Text(
               "FIND TUTOR",
               style: TextStyle(
@@ -27,12 +27,12 @@ class IntroPage1 extends StatelessWidget {
           Container(
             height: 300,
             width: 400,
-            margin: EdgeInsets.only(left: 20, right: 20),
+            margin: const EdgeInsets.only(left: 20, right: 20),
             child: Lottie.network(
                 'https://lottie.host/6c6f9e0c-a63c-4749-a320-94267e0c5cbb/A1cN2JEgOm.json'),
           ),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+          const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 30.0),
               child: Text(
                 "Explore and connect with professional tutors to support your learning journey.",
                 textAlign: TextAlign.center,

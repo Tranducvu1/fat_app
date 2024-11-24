@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fat_app/Model/chapter.dart';
 import 'package:fat_app/Model/lesson.dart';
 import 'package:fat_app/service/chapter_service.dart';
 

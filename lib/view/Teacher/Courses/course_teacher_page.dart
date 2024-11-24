@@ -128,14 +128,6 @@ class _CoursePage extends State<courseteacherPage> {
     return true;
   }
 
-  void _showAddchapterForm() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AddCoursesScreen(),
-      ),
-    );
-  }
-
   void _handleNewCourses() {
     setState(() {});
   }
@@ -231,24 +223,29 @@ class _CoursePage extends State<courseteacherPage> {
                             ],
                           ),
                         )
-                      : GridView.count(
-                          crossAxisCount: 2,
+                      : ListView.builder(
                           padding: const EdgeInsets.all(16.0),
-                          crossAxisSpacing: 16.0,
-                          mainAxisSpacing: 16.0,
-                          childAspectRatio: 0.7,
-                          children: courses.map((course) {
-                            return _buildClassCard(
-                              course.subject,
-                              course.teacher,
-                              '${course.startDate} - ${course.endDate}',
-                              course.price,
-                              course.description,
-                              true,
-                              course.id as String,
-                              course,
+                          itemCount: courses.length,
+                          itemBuilder: (context, index) {
+                            final course = courses[index];
+                            return Container(
+                              width: double
+                                  .infinity, // Ensure each card takes full width
+                              height: 320, // Fixed height for each card
+                              margin: const EdgeInsets.only(
+                                  bottom: 16.0), // Space between cards
+                              child: _buildClassCard(
+                                course.subject,
+                                course.teacher,
+                                '${course.startDate} - ${course.endDate}',
+                                course.price,
+                                course.description,
+                                true,
+                                course.id as String,
+                                course,
+                              ),
                             );
-                          }).toList(),
+                          },
                         ),
             ),
           ],

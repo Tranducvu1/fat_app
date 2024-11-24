@@ -9,13 +9,13 @@ class Chapter {
     required this.lessonId,
   });
 
-  // Tạo đối tượng Chapter từ map (dữ liệu Firestore)
+  // Convert Firestore document data into Chapter object
   factory Chapter.fromMap(Map<String, dynamic> map) {
     return Chapter(
       chapterId: map['chapterId'] ?? 0,
       chapterName: map['chapterName'] ?? '',
       lessonId: List<String>.from(
-          map['lesson_ID'] ?? []), // Đảm bảo Lesson là danh sách
+          map['lesson_ID'] ?? []), // Convert dynamic to List<String>
     );
   }
 
@@ -27,6 +27,7 @@ class Chapter {
     };
   }
 
+// Compare this snippet from lib/Model/lesson.dart:
   @override
   String toString() {
     return 'Chapter(chapterId: $chapterId, chapterName: $chapterName, lessonId: $lessonId)';
