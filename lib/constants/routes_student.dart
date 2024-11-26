@@ -3,15 +3,14 @@ import 'package:fat_app/Model/UserModel.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/constants/constant_routes.dart';
 import 'package:fat_app/view/Student/Chapter/question_page.dart';
+import 'package:fat_app/view/Student/Chatroom/chat_rooms_page.dart';
 import 'package:fat_app/view/Student/MainPage/tutor_detail_page.dart';
 import 'package:fat_app/view/Teacher/Chatroom/teacher_screen.dart';
 import 'package:fat_app/view/payment/confirm_method_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:fat_app/view/Student/Chatroom/chat_rooms_page.dart';
 import 'package:fat_app/view/Student/MainPage/class_schedule_page.dart';
 import 'package:fat_app/view/Student/MainPage/course_page.dart';
 import 'package:fat_app/view/Student/MainPage/interact_learning_page.dart';
-import 'package:fat_app/view/Student/Chapter/list_lecture_page.dart';
 import 'package:fat_app/view/Student/MainPage/tutor_list_page.dart';
 
 /// Student Routes

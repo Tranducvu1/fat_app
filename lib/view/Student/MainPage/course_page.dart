@@ -375,11 +375,10 @@ class _CoursePage extends State<CoursePage> with TickerProviderStateMixin {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (context) => LectureListScreen(
-                                        chapterId: course.chapterId
-                                            .map(int.parse)
-                                            .toList(),
-                                        course: course,
-                                      ),
+                                          chapterId: course.chapterId
+                                              .map(int.parse)
+                                              .toList(),
+                                          course: course),
                                     ),
                                   );
                                 } else {

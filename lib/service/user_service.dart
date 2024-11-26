@@ -19,6 +19,31 @@ class UserService {
     }
   }
 
+  Future<UserModel?> getCurrentUser() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+
+        if (userDoc.exists && userDoc.data() != null) {
+          print("Dữ liệu người dùng: ${userDoc.data()}");
+          return UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+        } else {
+          print("Không tìm thấy document cho UID: ${currentUser.uid}");
+        }
+      } catch (e) {
+        print("Lỗi khi lấy dữ liệu người dùng: $e");
+      }
+    } else {
+      print("Người dùng hiện tại null");
+    }
+    return null;
+  }
+
   Future<void> logout(BuildContext context) async {
     // Hiển thị hộp thoại loading
     showDialog(

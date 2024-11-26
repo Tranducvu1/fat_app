@@ -3,6 +3,7 @@ import 'package:fat_app/Model/chapter.dart';
 import 'package:fat_app/Model/courses.dart';
 import 'package:fat_app/Model/lesson.dart';
 import 'package:fat_app/service/chapter_service.dart';
+import 'package:fat_app/view/Student/Chapter/question_page.dart';
 import 'package:fat_app/view/Teacher/Chatroom/teacher_screen.dart';
 import 'package:fat_app/view/live/live.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,6 @@ class LectureListScreen extends StatelessWidget {
   final ChapterService _chapterService = ChapterService();
   final List<int>? chapterId;
   final Course course;
-
   LectureListScreen({
     Key? key,
     this.chapterId,
@@ -77,7 +77,7 @@ class LectureListScreen extends StatelessWidget {
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'Error: ${snapshot.error}', // Hiển thị thông báo lỗi chi tiết
+              'Error: ${snapshot.error}',
               style: TextStyle(color: Colors.red),
             ),
           );
@@ -260,17 +260,14 @@ class LessonTile extends StatelessWidget {
                                 onTap: () {
                                   print('trỏ tới :${lesson.lesson_ID}');
                                   Navigator.pop(context);
-                                  // Navigator.push(
-                                  //   context,
-                                  //   MaterialPageRoute(
-                                  //     builder: (context) => QuestionPage(
-                                  //       lessonId: lesson.questionid,
-                                  //     ),
-                                  //   ),
-                                  // );
-                                  Navigator.of(context).pushReplacementNamed(
-                                    '/question',
-                                    arguments: lesson.questionid,
+
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => QuestionPage(
+                                        lessonId: lesson.questionid,
+                                      ),
+                                    ),
                                   );
                                 },
                               ),

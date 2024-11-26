@@ -28,6 +28,12 @@
 	</dict>
 </array>
 <!-- End of the Google Sign-in Section -->
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>We need your location to share with others.</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs access to location when open to show your current location on the map.</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>This app needs access to location when in the background to show your current location on the map.</string>
 	<key>CFBundleDisplayName</key>
 	<string>Fat App</string>
 	<key>CFBundleExecutable</key>

@@ -145,7 +145,7 @@ class _TeacherScreenState extends State<TeacherScreen> {
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black),
               onPressed: () {
-                Navigator.of(context).pushNamed('/listlecture');
+                Navigator.of(context).pushNamed('/listlectureteacher');
               },
             ),
             title: Row(

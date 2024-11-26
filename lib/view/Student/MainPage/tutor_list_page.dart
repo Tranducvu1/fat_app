@@ -46,6 +46,7 @@ class _TutorListPageState extends State<TutorListPage> {
     try {
       QuerySnapshot queryResult;
 
+      // query courses
       if (selectedFilter != 'All') {
         queryResult = await FirebaseFirestore.instance
             .collection('Courses')
@@ -56,46 +57,53 @@ class _TutorListPageState extends State<TutorListPage> {
             await FirebaseFirestore.instance.collection('Courses').get();
       }
 
+      // get creatorIds
+      final creatorIds = queryResult.docs
+          .map((doc) => doc['creatorId'] ?? '')
+          .where((id) => id.isNotEmpty)
+          .toSet()
+          .toList();
+
+      final usersSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where(FieldPath.documentId, whereIn: creatorIds)
+          .get();
+
+      final userMap = {
+        for (var userDoc in usersSnapshot.docs)
+          userDoc.id: UserModel.fromMap(userDoc.data() as Map<String, dynamic>)
+      };
+
+      // process courses
       List<TutorData> loadedTutors = [];
-
-      for (var doc in queryResult.docs) {
-        // Kiểm tra search query
-        if (searchQuery.isNotEmpty) {
-          final subject = (doc['subject'] ?? '').toString().toLowerCase();
-          final teacher = (doc['teacher'] ?? '').toString().toLowerCase();
-          if (!subject.contains(searchQuery.toLowerCase()) &&
-              !teacher.contains(searchQuery.toLowerCase())) {
-            continue;
-          }
-        }
-
+      for (var courseDoc in queryResult.docs) {
         try {
-          Course course = Course.fromDocumentSnapshot(doc);
+          Course course = Course.fromDocumentSnapshot(courseDoc);
+          final user = userMap[course.creatorId];
 
-          // Kiểm tra creatorId
-          if (course.creatorId != null && course.creatorId.isNotEmpty) {
-            try {
-              DocumentSnapshot userDoc = await FirebaseFirestore.instance
-                  .collection('Users')
-                  .doc(course.creatorId)
-                  .get();
+          if (user != null) {
+            // filter courses by search query
+            final matchesQuery = searchQuery.isEmpty ||
+                course.subject
+                    .toLowerCase()
+                    .contains(searchQuery.toLowerCase()) ||
+                user.position
+                    .toLowerCase()
+                    .contains(searchQuery.toLowerCase()) ||
+                course.teacher
+                    .toLowerCase()
+                    .contains(searchQuery.toLowerCase());
 
-              if (userDoc.exists && userDoc.data() != null) {
-                UserModel user =
-                    UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
-                loadedTutors.add(TutorData(course: course, user: user));
-              }
-            } catch (userError) {
-              print('Error fetching user data: $userError');
-              continue;
+            if (matchesQuery) {
+              loadedTutors.add(TutorData(course: course, user: user));
             }
           }
-        } catch (courseError) {
-          print('Error processing course data: $courseError');
+        } catch (e) {
+          print('Error processing course or user: $e');
           continue;
         }
       }
-
+      // update state
       if (!mounted) return;
 
       setState(() {
@@ -104,6 +112,7 @@ class _TutorListPageState extends State<TutorListPage> {
       });
     } catch (e) {
       print('Error in fetchTutors: $e');
+
       if (!mounted) return;
 
       setState(() {
@@ -118,6 +127,89 @@ class _TutorListPageState extends State<TutorListPage> {
       );
     }
   }
+
+  // Future<void> fetchTutors() async {
+  //   if (!mounted) return;
+
+  //   setState(() {
+  //     isLoading = true;
+  //   });
+
+  //   try {
+  //     QuerySnapshot queryResult;
+
+  //     if (selectedFilter != 'All') {
+  //       queryResult = await FirebaseFirestore.instance
+  //           .collection('Courses')
+  //           .where('subject', isEqualTo: selectedFilter)
+  //           .get();
+  //     } else {
+  //       queryResult =
+  //           await FirebaseFirestore.instance.collection('Courses').get();
+  //     }
+
+  //     List<TutorData> loadedTutors = [];
+
+  //     for (var doc in queryResult.docs) {
+  //       // Kiểm tra search query
+  //       if (searchQuery.isNotEmpty) {
+  //         final subject = (doc['subject'] ?? '').toString().toLowerCase();
+  //         final teacher = (doc['teacher'] ?? '').toString().toLowerCase();
+  //         if (!subject.contains(searchQuery.toLowerCase()) &&
+  //             !teacher.contains(searchQuery.toLowerCase())) {
+  //           continue;
+  //         }
+  //       }
+
+  //       try {
+  //         Course course = Course.fromDocumentSnapshot(doc);
+
+  //         // Kiểm tra creatorId
+  //         if (course.creatorId != null && course.creatorId.isNotEmpty) {
+  //           try {
+  //             DocumentSnapshot userDoc = await FirebaseFirestore.instance
+  //                 .collection('Users')
+  //                 .doc(course.creatorId)
+  //                 .get();
+
+  //             if (userDoc.exists && userDoc.data() != null) {
+  //               UserModel user =
+  //                   UserModel.fromMap(userDoc.data() as Map<String, dynamic>);
+  //               loadedTutors.add(TutorData(course: course, user: user));
+  //             }
+  //           } catch (userError) {
+  //             print('Error fetching user data: $userError');
+  //             continue;
+  //           }
+  //         }
+  //       } catch (courseError) {
+  //         print('Error processing course data: $courseError');
+  //         continue;
+  //       }
+  //     }
+
+  //     if (!mounted) return;
+
+  //     setState(() {
+  //       tutors = loadedTutors;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     print('Error in fetchTutors: $e');
+  //     if (!mounted) return;
+
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Error loading tutors: ${e.toString()}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

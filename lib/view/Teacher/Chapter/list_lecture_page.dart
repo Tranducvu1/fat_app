@@ -154,7 +154,9 @@ class _LectureListTeacherScreenState extends State<LectureListTeacherScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LivePage(isHost: isHost),
+        builder: (context) => LivePage(
+          isHost: isHost,
+        ),
       ),
     );
   }

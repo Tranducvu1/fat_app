@@ -9,16 +9,6 @@ class DashboardScreen extends StatefulWidget {
   _DashboardScreenState createState() => _DashboardScreenState();
 }
 
-// Method to delete a document from Firestore
-void deleteUsers(String userid) {
-  FirebaseFirestore.instance.collection('Users').doc(userid).delete();
-}
-
-void editUser(BuildContext context, DocumentSnapshot course) {
-  // Open a dialog or navigate to the course detail edit screen here
-  // Example: Navigator.pushNamed(context, EditCourseScreen.routeName, arguments: course);
-}
-
 class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {

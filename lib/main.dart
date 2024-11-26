@@ -12,7 +12,15 @@ import 'package:google_fonts/google_fonts.dart';
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
   if (kIsWeb) {
-    // Initialize Firebase for web applications with specific options
+    // final GoogleMapsFlutterPlatform mapsImplementation =
+    //     GoogleMapsFlutterPlatform.instance;
+    // if (mapsImplementation is GoogleMapsFlutterAndroid) {
+    //   mapsImplementation.useAndroidViewSurface = true;
+    //   // Tùy chọn: Cấu hình renderer
+    //   await GoogleMapsFlutterAndroid.initializeWithRenderer(
+    //       AndroidMapRenderer.latest);
+    // }
+    // // Initialize Firebase for web applications with specific options
     await Firebase.initializeApp(
         options: const FirebaseOptions(
             apiKey: "AIzaSyCiwggXPtUAGNoyweoUyrfYRgv2fx2GrGw",
