@@ -127,27 +127,40 @@ class _ClassScheduleTeacherPageState extends State<ClassScheduleTeacherPage> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         final snapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('events')
+            .collection('Events')
+            .where('userId', isEqualTo: user.uid)
             .get();
-
         Map<DateTime, List<Event>> newEvents = {};
-
         for (var doc in snapshot.docs) {
-          final event = Event.fromMap(doc.data());
-          final date = DateTime(
-            event.startTime.year,
-            event.startTime.month,
-            event.startTime.day,
-          );
+          final eventData = doc.data();
+          print('Raw event data: $eventData');
+          // Convert Timestamp to DateTime
+          final startTime = (eventData['startTime'] as Timestamp).toDate();
+          final endTime = (eventData['endTime'] as Timestamp).toDate();
 
+          final event = Event(
+            title: eventData['title'] ?? '',
+            description: eventData['description'] ?? '',
+            startTime: startTime,
+            endTime: endTime,
+          );
+          final date = DateTime(
+            startTime.year,
+            startTime.month,
+            startTime.day,
+          );
           if (newEvents[date] == null) newEvents[date] = [];
           newEvents[date]!.add(event);
         }
-
         setState(() {
           _events = newEvents;
+          // Set _selectedDay to the first day with events or current day
+          if (newEvents.isNotEmpty) {
+            _selectedDay = newEvents.keys.first;
+            _focusedDay = _selectedDay!;
+          } else {
+            _selectedDay = DateTime.now();
+          }
         });
       }
     } catch (e) {
@@ -350,11 +363,12 @@ class _ClassScheduleTeacherPageState extends State<ClassScheduleTeacherPage> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('events')
-            .add(newEvent.toMap());
+        // Lưu event vào collection Events
+        final eventRef =
+            await FirebaseFirestore.instance.collection('Events').add({
+          ...newEvent.toMap(),
+          'userId': user.uid,
+        });
 
         final date = DateTime(
           selectedDay.year,
@@ -362,9 +376,16 @@ class _ClassScheduleTeacherPageState extends State<ClassScheduleTeacherPage> {
           selectedDay.day,
         );
 
+        final eventWithId = Event(
+          title: newEvent.title,
+          description: newEvent.description,
+          startTime: newEvent.startTime,
+          endTime: newEvent.endTime,
+        );
+
         setState(() {
           if (_events[date] == null) _events[date] = [];
-          _events[date]!.add(newEvent);
+          _events[date]!.add(eventWithId);
         });
       }
     } catch (e) {

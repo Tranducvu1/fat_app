@@ -27,7 +27,7 @@ class _QuestionPageState extends State<QuestionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bài tập'),
+        title: Text('Exercise'),
         backgroundColor: Colors.blue[800],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -39,7 +39,7 @@ class _QuestionPageState extends State<QuestionPage> {
           if (snapshot.hasError) {
             return Center(
               child: Text(
-                'Error: ${snapshot.error}', // Hiển thị thông báo lỗi chi tiết
+                'Error: ${snapshot.error}', // Display detailed error message
                 style: TextStyle(color: Colors.red),
               ),
             );
@@ -48,12 +48,11 @@ class _QuestionPageState extends State<QuestionPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
-
-          // Kiểm tra nếu không có dữ liệu hoặc danh sách câu hỏi trống
+          // Check if there is no data or the questions list is empty
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
               child: Text(
-                'Chưa có câu hỏi nào cho bài học này',
+                'No questions available for this lesson',
                 style: TextStyle(
                   fontSize: 18,
                   color: Colors.grey,
@@ -62,12 +61,12 @@ class _QuestionPageState extends State<QuestionPage> {
             );
           }
 
-          // Lấy danh sách câu hỏi
+          // Get the list of questions
           List<Map<String, dynamic>> questions = snapshot.data!.docs.map((doc) {
             Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
             data['id'] = doc.id;
 
-            // Kiểm tra và tạo `selectedAnswer` nếu chưa tồn tại
+            // Check and create `selectedAnswer` if it doesn't exist
             if (!data.containsKey('selectedAnswer')) {
               FirebaseFirestore.instance
                   .collection('questions')
@@ -86,7 +85,7 @@ class _QuestionPageState extends State<QuestionPage> {
                   padding: EdgeInsets.all(16),
                   color: Colors.blue[50],
                   child: Text(
-                    'Kết quả: $correctAnswers/${questions.length} câu đúng',
+                    'Result: $correctAnswers/${questions.length} correct answers',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -124,7 +123,7 @@ class _QuestionPageState extends State<QuestionPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Câu ${index + 1}: ${question['question']}',
+                              'Question ${index + 1}: ${question['question']}',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blue[800],
@@ -141,7 +140,7 @@ class _QuestionPageState extends State<QuestionPage> {
                                               answerIndex;
                                         });
 
-                                        // Lưu `selectedAnswer` vào Firestore
+                                        // Save `selectedAnswer` to Firestore
                                         FirebaseFirestore.instance
                                             .collection('questions')
                                             .doc(question['id'])
@@ -187,7 +186,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: ElevatedButton(
                   onPressed: isSubmitted
                       ? null
@@ -197,8 +196,8 @@ class _QuestionPageState extends State<QuestionPage> {
                             calculateScore(questions);
                           });
                         },
-                  child: Text(
-                    'Nộp bài',
+                  child: const Text(
+                    'Submit',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),

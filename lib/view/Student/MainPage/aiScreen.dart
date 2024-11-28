@@ -3,7 +3,7 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 
 class Config {
-  static const String apiKey = 'AIzaSyA9hufaBnBqVbRaZTiYK0N_5GxX8gLMVNc';
+  static const String apiKey = 'AIzaSyCfs2XFsb0MnaDXBJjlQIc-StYuXOc-4nI';
 }
 
 class ChatScreen extends StatefulWidget {

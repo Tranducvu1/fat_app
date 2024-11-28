@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fat_app/Model/event.dart';
+import 'package:fat_app/service/NotificationService.dart';
 import 'package:fat_app/view/widgets/navigation/custom_app_bar.dart';
 import 'package:fat_app/view/widgets/navigation/custom_bottom_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -38,7 +39,7 @@ class _ClassSchedulePage extends State<ClassSchedulePage> {
   Map<DateTime, List<Event>> _events = {};
   TimeOfDay _startTime = TimeOfDay.now();
   TimeOfDay _endTime = TimeOfDay.now();
-
+  final NotificationService _notificationService = NotificationService();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
@@ -125,27 +126,48 @@ class _ClassSchedulePage extends State<ClassSchedulePage> {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         final snapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('events')
+            .collection('Events')
+            .where('userId', isEqualTo: user.uid)
             .get();
-
         Map<DateTime, List<Event>> newEvents = {};
-
         for (var doc in snapshot.docs) {
-          final event = Event.fromMap(doc.data());
+          final eventData = doc.data();
+          print('Raw event data: $eventData');
+          // Convert Timestamp to DateTime
+          final startTime = (eventData['startTime'] as Timestamp).toDate();
+          final endTime = (eventData['endTime'] as Timestamp).toDate();
+
+          final event = Event(
+            title: eventData['title'] ?? '',
+            description: eventData['description'] ?? '',
+            startTime: startTime,
+            endTime: endTime,
+          );
           final date = DateTime(
-            event.startTime.year,
-            event.startTime.month,
-            event.startTime.day,
+            startTime.year,
+            startTime.month,
+            startTime.day,
+          );
+
+          _notificationService.scheduleEventNotification(
+            id: doc.id.hashCode, // Use document ID hash as notification ID
+            title: 'Upcoming Event: ${event.title}',
+            body: 'Details: ${event.description}',
+            scheduledDate: event.startTime,
           );
 
           if (newEvents[date] == null) newEvents[date] = [];
           newEvents[date]!.add(event);
         }
-
         setState(() {
           _events = newEvents;
+          // Set _selectedDay to the first day with events or current day
+          if (newEvents.isNotEmpty) {
+            _selectedDay = newEvents.keys.first;
+            _focusedDay = _selectedDay!;
+          } else {
+            _selectedDay = DateTime.now();
+          }
         });
       }
     } catch (e) {
@@ -348,11 +370,12 @@ class _ClassSchedulePage extends State<ClassSchedulePage> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('events')
-            .add(newEvent.toMap());
+        // Lưu event vào collection Events
+        final eventRef =
+            await FirebaseFirestore.instance.collection('Events').add({
+          ...newEvent.toMap(),
+          'userId': user.uid,
+        });
 
         final date = DateTime(
           selectedDay.year,
@@ -360,9 +383,16 @@ class _ClassSchedulePage extends State<ClassSchedulePage> {
           selectedDay.day,
         );
 
+        final eventWithId = Event(
+          title: newEvent.title,
+          description: newEvent.description,
+          startTime: newEvent.startTime,
+          endTime: newEvent.endTime,
+        );
+
         setState(() {
           if (_events[date] == null) _events[date] = [];
-          _events[date]!.add(newEvent);
+          _events[date]!.add(eventWithId);
         });
       }
     } catch (e) {
